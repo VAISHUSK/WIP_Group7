@@ -1,106 +1,85 @@
-// LoginScreen.js
+// screens/LoginScreen.js
 import React, { useState } from 'react';
-import { View, TextInput, Button, StyleSheet, useColorScheme, Text } from 'react-native';
+import { View, TextInput, Pressable, Text, StyleSheet, Alert } from 'react-native';
 import { signInWithEmailAndPassword } from 'firebase/auth';
-import { auth } from '../firebaseConfig';
+import { doc, getDoc } from 'firebase/firestore';
+import { auth, db } from '../firebaseConfig';
 
 const LoginScreen = ({ navigation }) => {
-    const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
-    const [error, setError] = useState('');
-    const colorScheme = useColorScheme();
-    const styles = colorScheme === 'dark' ? darkStyles : lightStyles;
-  
-    const handleLogin = () => {
-      signInWithEmailAndPassword(auth, email, password)
-        .then((userCredential) => {
-          console.log('User logged in:', userCredential.user);
-          // Navigate to Home screen after successful login
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+
+  const onLogin = async () => {
+    try {
+      const userCredentials = await signInWithEmailAndPassword(auth, email, password);
+      const user = userCredentials.user;
+
+      // Fetch user type from Firestore
+      const docRef = doc(db, 'Users', user.uid);
+      const docSnap = await getDoc(docRef);
+
+      if (docSnap.exists()) {
+        const userType = docSnap.data().UserType;
+
+        if (userType === 'user') {
           navigation.navigate('Home');
-        })
-        .catch((error) => {
-          setError(error.message);
-        });
-    };
-  
-    return (
-      <View style={styles.container}>
-        <Text style={styles.title}>Login</Text>
-        {error ? <Text style={styles.error}>{error}</Text> : null}
-        <TextInput
-          style={styles.input}
-          placeholder="Email"
-          placeholderTextColor={styles.placeholder.color}
-          value={email}
-          onChangeText={setEmail}
-        />
-        <TextInput
-          style={styles.input}
-          placeholder="Password"
-          placeholderTextColor={styles.placeholder.color}
-          value={password}
-          onChangeText={setPassword}
-          secureTextEntry
-        />
-        <Button title="Login" onPress={handleLogin} color={styles.buttonText.color} />
-      </View>
-    );
+        } else {
+          Alert.alert("Error", "Owner accounts should log in through the owner portal.");
+        }
+      } else {
+        Alert.alert("Error", "User details not found.");
+      }
+    } catch (error) {
+      Alert.alert("Error", error.message);
+    }
   };
 
-const baseStyles = {
+  return (
+    <View style={styles.container}>
+      <TextInput
+        style={styles.input}
+        placeholder="Email"
+        value={email}
+        onChangeText={setEmail}
+      />
+      <TextInput
+        style={styles.input}
+        placeholder="Password"
+        secureTextEntry
+        value={password}
+        onChangeText={setPassword}
+      />
+      <Pressable style={styles.button} onPress={onLogin}>
+        <Text style={styles.buttonText}>Login</Text>
+      </Pressable>
+    </View>
+  );
+};
+
+const styles = StyleSheet.create({
   container: {
     flex: 1,
     justifyContent: 'center',
-    alignItems: 'center',
     padding: 20,
   },
   input: {
-    height: 40,
+    height: 50,
     borderColor: 'gray',
     borderWidth: 1,
-    marginBottom: 20,
-    width: '100%',
-    paddingHorizontal: 10,
+    padding: 10,
+    marginBottom: 10,
+    borderRadius: 5,
+  },
+  button: {
+    height: 50,
+    backgroundColor: 'crimson',
+    justifyContent: 'center',
+    alignItems: 'center',
     borderRadius: 5,
   },
   buttonText: {
-    color: '#ffffff',
-  },
-  placeholder: {
-    color: 'gray',
-  },
-  error: {
-    color: 'red',
-    marginBottom: 10,
-  },
-};
-
-const lightStyles = StyleSheet.create({
-  ...baseStyles,
-  container: {
-    ...baseStyles.container,
-    backgroundColor: '#ffffff',
-  },
-  title: {
-    fontSize: 24,
-    marginBottom: 20,
-    color: '#000000',
-  },
-});
-
-const darkStyles = StyleSheet.create({
-  ...baseStyles,
-  container: {
-    ...baseStyles.container,
-    backgroundColor: '#000000',
-  },
-  title: {
-    fontSize: 24,
-    marginBottom: 20,
-    color: '#ffffff',
-  },
-  placeholder: {
-    color: '#b0b0b0',
+    color: '#fff',
+    fontWeight: 'bold',
   },
 });
 

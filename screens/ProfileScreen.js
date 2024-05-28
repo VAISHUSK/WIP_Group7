@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { View, TextInput, StyleSheet } from 'react-native';
 
-const HomeScreen = () => {
+const ProfileScreen = () => {
   const [searchQuery, setSearchQuery] = useState('');
 
   return (
@@ -32,4 +32,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default HomeScreen;
+export default ProfileScreen;
