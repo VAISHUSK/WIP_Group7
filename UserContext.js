@@ -1,44 +1,40 @@
 // UserContext.js
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import { auth, db } from './firebaseConfig';
+import { onAuthStateChanged } from 'firebase/auth';
 import { doc, getDoc } from 'firebase/firestore';
-import { db } from './firebaseConfig';
 
-export const UserContext = createContext();
-
-export const useUserDetails = () => useContext(UserContext);
+const UserContext = createContext();
 
 export const UserProvider = ({ children }) => {
-  const [user, setUser] = useState({
-    userId: null,
-    details: null,
-    userType: null,
-  });
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchUserDetails = async () => {
-      if (user.userId) {
-        const docRef = doc(db, 'Users', user.userId);
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        const docRef = doc(db, 'Users', user.uid);
         const docSnap = await getDoc(docRef);
-
         if (docSnap.exists()) {
-          const { Email, ProfileImageURL, UserType, Username } = docSnap.data();
-          setUser((prevUser) => ({
-            ...prevUser,
-            details: {
-              Email,
-              ProfileImageURL,
-              Username,
-            },
-            userType: UserType,
-          }));
+          const userType = docSnap.data().userType;
+          setUser({ ...user, userType });
         } else {
-          console.error("User details not found in database");
+          setUser(null);
         }
+      } else {
+        setUser(null);
       }
-    };
+      setLoading(false);
+    });
 
-    fetchUserDetails();
-  }, [user.userId]);
+    return unsubscribe;
+  }, []);
 
-  return <UserContext.Provider value={{ user, setUser }}>{children}</UserContext.Provider>;
+  return (
+    <UserContext.Provider value={{ user, loading }}>
+      {children}
+    </UserContext.Provider>
+  );
 };
+
+export const useUser = () => useContext(UserContext);

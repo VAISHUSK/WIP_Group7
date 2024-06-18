@@ -1,47 +1,56 @@
 // App.js
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
-import { auth } from './firebaseConfig'; // Import Firebase auth
-
-import BottomTabNavigator from './screens/BottomTabNavigator';
+import { UserProvider, useUser } from './UserContext'; // Import UserContext
 import LoginScreen from './screens/LoginScreen';
 import SignUpScreen from './screens/SignUpScreen';
 import LandingScreen from './screens/LandingScreen';
+import EmployerTabNavigator from './screens/EmployerTabNavigator';
+import EmployeeTabNavigator from './screens/EmployeeTabNavigator';
 
 const Stack = createStackNavigator();
 
 const App = () => {
-  const [user, setUser] = useState(null);
+  const { user, loading } = useUser();
 
-  useEffect(() => {
-    const unsubscribe = auth.onAuthStateChanged((user) => {
-      setUser(user);
-    });
-
-    // Cleanup subscription
-    return unsubscribe;
-  }, []);
+  if (loading) {
+    return null; // Or a loading spinner
+  }
 
   return (
     <NavigationContainer>
       <Stack.Navigator>
         {!user ? (
           <>
-            <Stack.Screen name="Search" component={LandingScreen} options={{ headerShown: false }} />
+            <Stack.Screen name="Landing" component={LandingScreen} options={{ headerShown: false }} />
             <Stack.Screen name="Login" component={LoginScreen} options={{ title: 'Login' }} />
             <Stack.Screen name="SignUp" component={SignUpScreen} options={{ title: 'Sign Up' }} />
           </>
-        ) : (
+        ) : user.userType === 'employer' ? (
           <Stack.Screen
-            name="Main"
-            component={BottomTabNavigator}
+            name="EmployerTabNavigator"
+            component={EmployerTabNavigator}
             options={{ headerShown: false }}
           />
+        ) : user.userType === 'employee' ? (
+          <Stack.Screen
+            name="EmployeeTabNavigator"
+            component={EmployeeTabNavigator}
+            options={{ headerShown: false }}
+          />
+        ) : (
+          <Stack.Screen name="Login" component={LoginScreen} options={{ title: 'Login' }} />
         )}
       </Stack.Navigator>
     </NavigationContainer>
   );
 };
 
-export default App;
+const RootApp = () => (
+  <UserProvider>
+    <App />
+  </UserProvider>
+);
+
+export default RootApp;

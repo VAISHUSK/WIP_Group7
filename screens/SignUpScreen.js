@@ -1,31 +1,30 @@
-// screens/SignUpScreen.js
 import React, { useState } from 'react';
-import { View, TextInput, Pressable, Text, StyleSheet, Alert } from 'react-native';
+import { View, TextInput, Button, StyleSheet, Alert } from 'react-native';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
-import { setDoc, doc } from 'firebase/firestore';
 import { auth, db } from '../firebaseConfig';
+import { doc, setDoc } from 'firebase/firestore';
+import { useNavigation } from '@react-navigation/native';
+import { Picker } from '@react-native-picker/picker';
 
-const SignUpScreen = ({ navigation }) => {
+const SignUpScreen = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [username, setUsername] = useState('');
+  const [userType, setUserType] = useState('employee');
+  const navigation = useNavigation();
 
-  const onSignUp = async () => {
+  const handleSignUp = async () => {
     try {
-      const userCredentials = await createUserWithEmailAndPassword(auth, email, password);
-      const user = userCredentials.user;
-
-      // Save user details to Firestore
+      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+      const user = userCredential.user;
       await setDoc(doc(db, 'Users', user.uid), {
-        Email: email,
-        Username: username,
-        UserType: 'user',
+        username,
+        email,
+        userType
       });
-
-      Alert.alert("Success", "Sign-up successful. Please log in.");
       navigation.navigate('Login');
     } catch (error) {
-      Alert.alert("Error", error.message);
+      Alert.alert('Sign Up Error', error.message);
     }
   };
 
@@ -33,26 +32,36 @@ const SignUpScreen = ({ navigation }) => {
     <View style={styles.container}>
       <TextInput
         style={styles.input}
+        placeholder="Username"
+        value={username}
+        onChangeText={setUsername}
+        autoCapitalize="none"
+      />
+      <TextInput
+        style={styles.input}
         placeholder="Email"
         value={email}
         onChangeText={setEmail}
+        keyboardType="email-address"
+        autoCapitalize="none"
       />
       <TextInput
         style={styles.input}
         placeholder="Password"
-        secureTextEntry
         value={password}
         onChangeText={setPassword}
+        secureTextEntry
+        autoCapitalize="none"
       />
-      <TextInput
-        style={styles.input}
-        placeholder="Username"
-        value={username}
-        onChangeText={setUsername}
-      />
-      <Pressable style={styles.button} onPress={onSignUp}>
-        <Text style={styles.buttonText}>Sign Up</Text>
-      </Pressable>
+      <Picker
+        selectedValue={userType}
+        style={styles.picker}
+        onValueChange={(itemValue) => setUserType(itemValue)}
+      >
+        <Picker.Item label="Employee" value="employee" />
+        <Picker.Item label="Employer" value="employer" />
+      </Picker>
+      <Button title="Sign Up" onPress={handleSignUp} />
     </View>
   );
 };
@@ -61,26 +70,19 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     justifyContent: 'center',
-    padding: 20,
+    padding: 16,
   },
   input: {
-    height: 50,
+    height: 40,
     borderColor: 'gray',
     borderWidth: 1,
-    padding: 10,
-    marginBottom: 10,
-    borderRadius: 5,
+    marginBottom: 12,
+    paddingHorizontal: 8,
   },
-  button: {
+  picker: {
     height: 50,
-    backgroundColor: 'crimson',
-    justifyContent: 'center',
-    alignItems: 'center',
-    borderRadius: 5,
-  },
-  buttonText: {
-    color: '#fff',
-    fontWeight: 'bold',
+    width: '100%',
+    marginBottom: 12,
   },
 });
 

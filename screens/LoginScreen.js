@@ -19,12 +19,14 @@ const LoginScreen = ({ navigation }) => {
       const docSnap = await getDoc(docRef);
 
       if (docSnap.exists()) {
-        const userType = docSnap.data().UserType;
+        const userType = docSnap.data().userType;
 
-        if (userType === 'user') {
-          navigation.navigate('Home');
+        if (userType === 'employee') {
+          navigation.navigate('EmployeeTabNavigator'); // Navigate to the employee tab navigator
+        } else if (userType === 'employer') {
+          navigation.navigate('EmployerTabNAvigator'); // Navigate to the employer tab navigator
         } else {
-          Alert.alert("Error", "Owner accounts should log in through the owner portal.");
+          Alert.alert("Error", "Invalid user type: " + userType); // Handle unexpected user types
         }
       } else {
         Alert.alert("Error", "User details not found.");
