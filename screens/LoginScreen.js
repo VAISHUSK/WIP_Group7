@@ -1,6 +1,5 @@
-// screens/LoginScreen.js
 import React, { useState } from 'react';
-import { View, TextInput, Pressable, Text, StyleSheet, Alert } from 'react-native';
+import { View, TextInput, Pressable, Text, StyleSheet, Image, Alert } from 'react-native';
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import { doc, getDoc } from 'firebase/firestore';
 import { auth, db } from '../firebaseConfig';
@@ -14,7 +13,6 @@ const LoginScreen = ({ navigation }) => {
       const userCredentials = await signInWithEmailAndPassword(auth, email, password);
       const user = userCredentials.user;
 
-      // Fetch user type from Firestore
       const docRef = doc(db, 'Users', user.uid);
       const docSnap = await getDoc(docRef);
 
@@ -22,11 +20,11 @@ const LoginScreen = ({ navigation }) => {
         const userType = docSnap.data().userType;
 
         if (userType === 'employee') {
-          navigation.navigate('EmployeeTabNavigator'); // Navigate to the employee tab navigator
+          navigation.navigate('EmployeeTabNavigator');
         } else if (userType === 'employer') {
-          navigation.navigate('EmployerTabNAvigator'); // Navigate to the employer tab navigator
+          navigation.navigate('EmployerTabNavigator');
         } else {
-          Alert.alert("Error", "Invalid user type: " + userType); // Handle unexpected user types
+          Alert.alert("Error", "Invalid user type: " + userType);
         }
       } else {
         Alert.alert("Error", "User details not found.");
@@ -38,6 +36,7 @@ const LoginScreen = ({ navigation }) => {
 
   return (
     <View style={styles.container}>
+      <Image source={require('../assets/logo.png')} style={styles.logo} />
       <TextInput
         style={styles.input}
         placeholder="Email"
@@ -63,6 +62,13 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     padding: 20,
+    backgroundColor: '#f0f0f0',
+  },
+  logo: {
+    width: 150,
+    height: 150,
+    marginBottom: 20,
+    alignSelf: 'center',
   },
   input: {
     height: 50,
@@ -74,7 +80,7 @@ const styles = StyleSheet.create({
   },
   button: {
     height: 50,
-    backgroundColor: 'crimson',
+    backgroundColor: 'black',
     justifyContent: 'center',
     alignItems: 'center',
     borderRadius: 5,

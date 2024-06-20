@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, TextInput, Button, StyleSheet, Alert } from 'react-native';
+import { View, TextInput, Button, StyleSheet, Alert, Image } from 'react-native';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
 import { auth, db } from '../firebaseConfig';
 import { doc, setDoc } from 'firebase/firestore';
@@ -30,6 +30,7 @@ const SignUpScreen = () => {
 
   return (
     <View style={styles.container}>
+      <Image source={require('../assets/logo.png')} style={styles.logo} />
       <TextInput
         style={styles.input}
         placeholder="Username"
@@ -61,7 +62,7 @@ const SignUpScreen = () => {
         <Picker.Item label="Employee" value="employee" />
         <Picker.Item label="Employer" value="employer" />
       </Picker>
-      <Button title="Sign Up" onPress={handleSignUp} />
+      <Button title="Sign Up" onPress={handleSignUp} color="black" />
     </View>
   );
 };
@@ -71,6 +72,13 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     padding: 16,
+    backgroundColor: '#f0f0f0',
+  },
+  logo: {
+    width: 150,
+    height: 150,
+    marginBottom: 20,
+    alignSelf: 'center',
   },
   input: {
     height: 40,
@@ -78,6 +86,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     marginBottom: 12,
     paddingHorizontal: 8,
+    borderRadius: 5,
   },
   picker: {
     height: 50,

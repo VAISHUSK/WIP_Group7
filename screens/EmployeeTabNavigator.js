@@ -1,4 +1,3 @@
-// screens/EmployeeTabNavigator.js
 import React from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Ionicons } from '@expo/vector-icons';
@@ -6,6 +5,7 @@ import { Ionicons } from '@expo/vector-icons';
 import JobSearchScreen from './JobSearchScreen';
 import NotificationsScreen from './NotificationsScreen';
 import ProfileScreen from './ProfileScreen';
+import HomeScreen from './HomeScreen'; // Import HomeScreen
 
 const Tab = createBottomTabNavigator();
 
@@ -16,7 +16,9 @@ const EmployeeTabNavigator = () => {
         tabBarIcon: ({ focused, color, size }) => {
           let iconName;
 
-          if (route.name === 'JobSearch') {
+          if (route.name === 'Home') {
+            iconName = focused ? 'home' : 'home-outline';
+          } else if (route.name === 'JobSearch') {
             iconName = focused ? 'search' : 'search-outline';
           } else if (route.name === 'Notifications') {
             iconName = focused ? 'notifications' : 'notifications-outline';
@@ -32,6 +34,7 @@ const EmployeeTabNavigator = () => {
         inactiveTintColor: 'gray',
       }}
     >
+      <Tab.Screen name="Home" component={HomeScreen} />
       <Tab.Screen name="JobSearch" component={JobSearchScreen} />
       <Tab.Screen name="Notifications" component={NotificationsScreen} />
       <Tab.Screen name="Profile" component={ProfileScreen} />

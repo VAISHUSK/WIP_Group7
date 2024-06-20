@@ -1,17 +1,16 @@
-// screens/SearchScreen.js
 import React from 'react';
-import { View, Text, Pressable, StyleSheet, TextInput } from 'react-native';
+import { View, Text, Pressable, StyleSheet, TextInput, Image } from 'react-native';
 
 const LandingScreen = ({ navigation }) => {
   const [searchQuery, setSearchQuery] = React.useState('');
 
   const handleSearch = () => {
-    // Handle search functionality
     console.log('Searching for:', searchQuery);
   };
 
   return (
     <View style={styles.container}>
+      <Image source={require('../assets/logo.png')} style={styles.logo} />
       <Text style={styles.title}>Job Search App</Text>
       <View style={styles.searchContainer}>
         <TextInput
@@ -48,6 +47,11 @@ const styles = StyleSheet.create({
     backgroundColor: '#f0f0f0',
     padding: 20,
   },
+  logo: {
+    width: 150,
+    height: 150,
+    marginBottom: 20,
+  },
   title: {
     fontSize: 24,
     fontWeight: 'bold',
@@ -67,7 +71,7 @@ const styles = StyleSheet.create({
     borderRadius: 5,
   },
   searchButton: {
-    backgroundColor: 'crimson',
+    backgroundColor: 'black',
     marginLeft: 10,
     padding: 10,
     borderRadius: 5,
@@ -77,7 +81,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   button: {
-    backgroundColor: 'crimson',
+    backgroundColor: 'black',
     width: '100%',
     padding: 15,
     borderRadius: 5,
