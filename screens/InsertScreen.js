@@ -4,9 +4,6 @@ import { View, TextInput, StyleSheet } from 'react-native';
 
 const InsertScreen = () => {
   const [searchQuery, setSearchQuery] = useState('');
-
-
-  
   return (
     <View style={styles.container}>
       <TextInput
