@@ -5,7 +5,7 @@ import { Ionicons } from '@expo/vector-icons';
 import JobSearchScreen from './JobSearchScreen';
 import NotificationsScreen from './NotificationsScreen';
 import ProfileScreen from './ProfileScreen';
-import HomeScreen from './HomeScreen'; // Import HomeScreen
+import HomeScreen from './HomeScreen';
 
 const Tab = createBottomTabNavigator();
 
@@ -15,7 +15,6 @@ const EmployeeTabNavigator = () => {
       screenOptions={({ route }) => ({
         tabBarIcon: ({ focused, color, size }) => {
           let iconName;
-
           if (route.name === 'Home') {
             iconName = focused ? 'home' : 'home-outline';
           } else if (route.name === 'JobSearch') {
@@ -25,14 +24,12 @@ const EmployeeTabNavigator = () => {
           } else if (route.name === 'Profile') {
             iconName = focused ? 'person' : 'person-outline';
           }
-
           return <Ionicons name={iconName} size={size} color={color} />;
         },
+        tabBarActiveTintColor: 'tomato',
+        tabBarInactiveTintColor: 'gray',
+        tabBarStyle: { display: 'flex' }
       })}
-      tabBarOptions={{
-        activeTintColor: 'tomato',
-        inactiveTintColor: 'gray',
-      }}
     >
       <Tab.Screen name="Home" component={HomeScreen} />
       <Tab.Screen name="JobSearch" component={JobSearchScreen} />

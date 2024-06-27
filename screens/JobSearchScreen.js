@@ -5,6 +5,8 @@ import { db } from '../firebaseConfig';
 import { Ionicons } from '@expo/vector-icons';
 import MapView, { Marker } from 'react-native-maps';
 import { Button, CheckBox } from 'react-native-elements';
+import { Picker } from '@react-native-picker/picker';  
+import { Slider } from 'react-native-elements';
 
 const JobSearchScreen = () => {
   const [searchQuery, setSearchQuery] = useState('');
@@ -15,6 +17,9 @@ const JobSearchScreen = () => {
     fullTime: false,
     partTime: false,
     remote: false,
+    salaryRange: [0, 100000],
+    jobType: 'Any',
+    kmRange: 10,
   });
 
   useEffect(() => {
@@ -30,6 +35,8 @@ const JobSearchScreen = () => {
       if (filters.fullTime) jobsList = jobsList.filter(job => job.type === 'Full-Time');
       if (filters.partTime) jobsList = jobsList.filter(job => job.type === 'Part-Time');
       if (filters.remote) jobsList = jobsList.filter(job => job.remote);
+      if (filters.salaryRange) jobsList = jobsList.filter(job => job.salary >= filters.salaryRange[0] && job.salary <= filters.salaryRange[1]);
+      if (filters.jobType && filters.jobType !== 'Any') jobsList = jobsList.filter(job => job.type === filters.jobType);
 
       setJobs(jobsList);
     } catch (error) {
@@ -115,6 +122,45 @@ const JobSearchScreen = () => {
               checked={filters.remote}
               onPress={() => setFilters({ ...filters, remote: !filters.remote })}
             />
+            <Text style={styles.filterLabel}>Salary Range</Text>
+            <TextInput
+              style={styles.input}
+              placeholder="Min Salary"
+              value={String(filters.salaryRange[0])}
+              keyboardType="numeric"
+              onChangeText={min => setFilters({ ...filters, salaryRange: [Number(min), filters.salaryRange[1]] })}
+            />
+            <TextInput
+              style={styles.input}
+              placeholder="Max Salary"
+              value={String(filters.salaryRange[1])}
+              keyboardType="numeric"
+              onChangeText={max => setFilters({ ...filters, salaryRange: [filters.salaryRange[0], Number(max)] })}
+            />
+            <Text style={styles.filterLabel}>Job Type</Text>
+            <Picker
+              selectedValue={filters.jobType}
+              onValueChange={jobType => setFilters({ ...filters, jobType })}
+              style={styles.picker}
+            >
+              <Picker.Item label="Any" value="Any" />
+              <Picker.Item label="Full-Time" value="Full-Time" />
+              <Picker.Item label="Part-Time" value="Part-Time" />
+              <Picker.Item label="Contract" value="Contract" />
+              <Picker.Item label="Internship" value="Internship" />
+            </Picker>
+            <Text style={styles.filterLabel}>Distance (km)</Text>
+            <Slider
+              style={styles.slider}
+              minimumValue={1}
+              maximumValue={100}
+              step={1}
+              value={filters.kmRange}
+              onValueChange={value => setFilters({ ...filters, kmRange: value })}
+              minimumTrackTintColor="dodgerblue"
+              maximumTrackTintColor="#d3d3d3"
+            />
+            <Text>{filters.kmRange} km</Text>
             <Button
               title="Apply Filters"
               onPress={() => {
@@ -177,67 +223,69 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 16,
-    padding: 12,
-    backgroundColor: '#f0f0f0',
-    borderRadius: 8,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
-    elevation: 2,
+    padding: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: '#ddd',
   },
   jobDetails: {
     flex: 1,
   },
   jobTitle: {
-    fontSize: 18,
+    fontSize: 16,
     fontWeight: 'bold',
-    marginBottom: 4,
-    color: '#333',
   },
   jobCompany: {
-    color: '#666',
-    marginBottom: 4,
+    fontSize: 14,
+    color: '#555',
   },
   jobLocation: {
-    color: '#666',
+    fontSize: 12,
+    color: '#888',
   },
   applyButton: {
     backgroundColor: 'dodgerblue',
-    paddingHorizontal: 16,
-    paddingVertical: 8,
+    padding: 8,
     borderRadius: 5,
   },
   applyText: {
-    color: '#fff',
+    color: 'white',
     fontWeight: 'bold',
   },
   map: {
-    flex: 1,
-    width: Dimensions.get('window').width,
-    height: Dimensions.get('window').height,
+    ...StyleSheet.absoluteFillObject,
   },
   modalContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    backgroundColor: 'rgba(0,0,0,0.5)',
   },
   modalContent: {
-    width: '80%',
-    padding: 20,
     backgroundColor: 'white',
+    padding: 20,
     borderRadius: 10,
+    width: Dimensions.get('window').width - 40,
   },
   modalTitle: {
-    fontSize: 24,
+    fontSize: 18,
     fontWeight: 'bold',
-    marginBottom: 20,
+    marginBottom: 10,
+  },
+  filterLabel: {
+    fontSize: 16,
+    marginVertical: 5,
+  },
+  picker: {
+    height: 50,
+    width: '100%',
+  },
+  slider: {
+    width: '100%',
+    marginVertical: 10,
   },
   applyFilterButton: {
     backgroundColor: 'dodgerblue',
-    marginTop: 20,
+    borderRadius: 5,
   },
 });
 
