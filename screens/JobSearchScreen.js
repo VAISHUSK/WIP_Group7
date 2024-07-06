@@ -21,12 +21,16 @@ const JobSearchScreen = () => {
     jobType: 'Any',
     kmRange: 10,
   });
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
 
   useEffect(() => {
     fetchJobs();
   }, [filters]);
 
   const fetchJobs = async () => {
+    setLoading(true);
+    setError('');
     try {
       const q = searchQuery ? query(collection(db, 'jobs'), where('title', '==', searchQuery)) : collection(db, 'jobs');
       const querySnapshot = await getDocs(q);
@@ -40,7 +44,10 @@ const JobSearchScreen = () => {
 
       setJobs(jobsList);
     } catch (error) {
+      setError('Error fetching jobs');
       console.error('Error fetching jobs:', error);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -87,16 +94,21 @@ const JobSearchScreen = () => {
           <Ionicons name={isListView ? "map" : "list"} size={24} color="white" />
         </TouchableOpacity>
       </View>
-      {isListView ? (
-        <FlatList
-          data={jobs}
-          renderItem={renderJob}
-          keyExtractor={item => item.id}
-        />
+      {loading && <Text style={styles.loadingText}>Loading...</Text>}
+      {error ? (
+        <Text style={styles.errorText}>{error}</Text>
       ) : (
-        <MapView style={styles.map}>
-          {renderMapMarkers()}
-        </MapView>
+        isListView ? (
+          <FlatList
+            data={jobs}
+            renderItem={renderJob}
+            keyExtractor={item => item.id}
+          />
+        ) : (
+          <MapView style={styles.map}>
+            {renderMapMarkers()}
+          </MapView>
+        )
       )}
       <Modal
         visible={modalVisible}
@@ -286,6 +298,17 @@ const styles = StyleSheet.create({
   applyFilterButton: {
     backgroundColor: 'dodgerblue',
     borderRadius: 5,
+  },
+  loadingText: {
+    textAlign: 'center',
+    fontSize: 16,
+    marginVertical: 20,
+  },
+  errorText: {
+    color: 'red',
+    textAlign: 'center',
+    fontSize: 16,
+    marginVertical: 20,
   },
 });
 
