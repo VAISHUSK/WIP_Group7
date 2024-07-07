@@ -23,6 +23,12 @@ const JobSearchScreen = () => {
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [mapRegion, setMapRegion] = useState({
+    latitude: 37.7749,
+    longitude: -122.4194,
+    latitudeDelta: 0.0922,
+    longitudeDelta: 0.0421,
+  });
 
   useEffect(() => {
     fetchJobs();
@@ -105,7 +111,11 @@ const JobSearchScreen = () => {
             keyExtractor={item => item.id}
           />
         ) : (
-          <MapView style={styles.map}>
+          <MapView
+            style={styles.map}
+            region={mapRegion}
+            onRegionChangeComplete={region => setMapRegion(region)}
+          >
             {renderMapMarkers()}
           </MapView>
         )
@@ -248,23 +258,25 @@ const styles = StyleSheet.create({
   },
   jobCompany: {
     fontSize: 14,
-    color: '#555',
+    color: 'gray',
   },
   jobLocation: {
     fontSize: 12,
-    color: '#888',
+    color: 'gray',
   },
   applyButton: {
     backgroundColor: 'dodgerblue',
-    padding: 8,
+    paddingVertical: 5,
+    paddingHorizontal: 10,
     borderRadius: 5,
   },
   applyText: {
     color: 'white',
-    fontWeight: 'bold',
   },
   map: {
-    ...StyleSheet.absoluteFillObject,
+    flex: 1,
+    width: Dimensions.get('window').width,
+    height: Dimensions.get('window').height,
   },
   modalContainer: {
     flex: 1,
@@ -273,10 +285,10 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0,0,0,0.5)',
   },
   modalContent: {
+    width: '90%',
     backgroundColor: 'white',
     padding: 20,
     borderRadius: 10,
-    width: Dimensions.get('window').width - 40,
   },
   modalTitle: {
     fontSize: 18,
@@ -285,7 +297,8 @@ const styles = StyleSheet.create({
   },
   filterLabel: {
     fontSize: 16,
-    marginVertical: 5,
+    fontWeight: 'bold',
+    marginVertical: 10,
   },
   picker: {
     height: 50,
@@ -297,18 +310,17 @@ const styles = StyleSheet.create({
   },
   applyFilterButton: {
     backgroundColor: 'dodgerblue',
-    borderRadius: 5,
+    marginTop: 20,
   },
   loadingText: {
     textAlign: 'center',
     fontSize: 16,
-    marginVertical: 20,
+    color: 'gray',
   },
   errorText: {
-    color: 'red',
     textAlign: 'center',
     fontSize: 16,
-    marginVertical: 20,
+    color: 'red',
   },
 });
 
