@@ -1,12 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, FlatList, StyleSheet, TouchableOpacity, Modal, Dimensions } from 'react-native';
+import { View, Text, TextInput, FlatList, StyleSheet, TouchableOpacity, Modal } from 'react-native';
 import { collection, query, where, getDocs } from 'firebase/firestore';
 import { db } from '../firebaseConfig';
 import { Ionicons } from '@expo/vector-icons';
 import MapView, { Marker } from 'react-native-maps';
-import { Button, CheckBox } from 'react-native-elements';
-import { Picker } from '@react-native-picker/picker';  
-import { Slider } from 'react-native-elements';
+import Slider from '@react-native-community/slider';
+import { Picker } from '@react-native-picker/picker';
 
 const JobSearchScreen = () => {
   const [searchQuery, setSearchQuery] = useState('');
@@ -14,11 +13,10 @@ const JobSearchScreen = () => {
   const [isListView, setIsListView] = useState(true);
   const [modalVisible, setModalVisible] = useState(false);
   const [filters, setFilters] = useState({
-    fullTime: false,
-    partTime: false,
-    remote: false,
-    salaryRange: [0, 100000],
     jobType: 'Any',
+    salary: 'Any',
+    location: '',
+    province: 'Any',
     kmRange: 10,
   });
   const [loading, setLoading] = useState(false);
@@ -38,15 +36,19 @@ const JobSearchScreen = () => {
     setLoading(true);
     setError('');
     try {
-      const q = searchQuery ? query(collection(db, 'jobs'), where('title', '==', searchQuery)) : collection(db, 'jobs');
+      let q = collection(db, 'jobs');
+
+      if (searchQuery) {
+        q = query(q, where('title', '==', searchQuery));
+      }
+
       const querySnapshot = await getDocs(q);
       let jobsList = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
 
-      if (filters.fullTime) jobsList = jobsList.filter(job => job.type === 'Full-Time');
-      if (filters.partTime) jobsList = jobsList.filter(job => job.type === 'Part-Time');
-      if (filters.remote) jobsList = jobsList.filter(job => job.remote);
-      if (filters.salaryRange) jobsList = jobsList.filter(job => job.salary >= filters.salaryRange[0] && job.salary <= filters.salaryRange[1]);
       if (filters.jobType && filters.jobType !== 'Any') jobsList = jobsList.filter(job => job.type === filters.jobType);
+      if (filters.salary && filters.salary !== 'Any') jobsList = jobsList.filter(job => job.salary === filters.salary);
+      if (filters.location) jobsList = jobsList.filter(job => job.location.toLowerCase().includes(filters.location.toLowerCase()));
+      if (filters.province && filters.province !== 'Any') jobsList = jobsList.filter(job => job.province === filters.province);
 
       setJobs(jobsList);
     } catch (error) {
@@ -62,7 +64,7 @@ const JobSearchScreen = () => {
       <View style={styles.jobDetails}>
         <Text style={styles.jobTitle}>{item.title}</Text>
         <Text style={styles.jobCompany}>{item.company}</Text>
-        <Text style={styles.jobLocation}>{item.location}</Text>
+        <Text style={styles.jobLocation}>{item.location}, {item.province}</Text>
       </View>
       <TouchableOpacity style={styles.applyButton}>
         <Text style={styles.applyText}>Apply</Text>
@@ -75,7 +77,7 @@ const JobSearchScreen = () => {
       key={job.id}
       coordinate={{ latitude: job.latitude, longitude: job.longitude }}
       title={job.title}
-      description={`${job.company} - ${job.location}`}
+      description={`${job.company} - ${job.location}, ${job.province}`}
     />
   ));
 
@@ -129,36 +131,6 @@ const JobSearchScreen = () => {
         <View style={styles.modalContainer}>
           <View style={styles.modalContent}>
             <Text style={styles.modalTitle}>Filters</Text>
-            <CheckBox
-              title="Full-Time"
-              checked={filters.fullTime}
-              onPress={() => setFilters({ ...filters, fullTime: !filters.fullTime })}
-            />
-            <CheckBox
-              title="Part-Time"
-              checked={filters.partTime}
-              onPress={() => setFilters({ ...filters, partTime: !filters.partTime })}
-            />
-            <CheckBox
-              title="Remote"
-              checked={filters.remote}
-              onPress={() => setFilters({ ...filters, remote: !filters.remote })}
-            />
-            <Text style={styles.filterLabel}>Salary Range</Text>
-            <TextInput
-              style={styles.input}
-              placeholder="Min Salary"
-              value={String(filters.salaryRange[0])}
-              keyboardType="numeric"
-              onChangeText={min => setFilters({ ...filters, salaryRange: [Number(min), filters.salaryRange[1]] })}
-            />
-            <TextInput
-              style={styles.input}
-              placeholder="Max Salary"
-              value={String(filters.salaryRange[1])}
-              keyboardType="numeric"
-              onChangeText={max => setFilters({ ...filters, salaryRange: [filters.salaryRange[0], Number(max)] })}
-            />
             <Text style={styles.filterLabel}>Job Type</Text>
             <Picker
               selectedValue={filters.jobType}
@@ -166,10 +138,49 @@ const JobSearchScreen = () => {
               style={styles.picker}
             >
               <Picker.Item label="Any" value="Any" />
-              <Picker.Item label="Full-Time" value="Full-Time" />
               <Picker.Item label="Part-Time" value="Part-Time" />
               <Picker.Item label="Contract" value="Contract" />
               <Picker.Item label="Internship" value="Internship" />
+            </Picker>
+            <Text style={styles.filterLabel}>Salary</Text>
+            <Picker
+              selectedValue={filters.salary}
+              onValueChange={salary => setFilters({ ...filters, salary })}
+              style={styles.picker}
+            >
+              <Picker.Item label="Any" value="Any" />
+              <Picker.Item label="$30,000" value="30000" />
+              <Picker.Item label="$50,000" value="50000" />
+              <Picker.Item label="$70,000" value="70000" />
+              <Picker.Item label="$90,000" value="90000" />
+            </Picker>
+            <Text style={styles.filterLabel}>Location</Text>
+            <TextInput
+              style={styles.input}
+              placeholder="City or Address"
+              value={filters.location}
+              onChangeText={location => setFilters({ ...filters, location })}
+            />
+            <Text style={styles.filterLabel}>Province</Text>
+            <Picker
+              selectedValue={filters.province}
+              onValueChange={province => setFilters({ ...filters, province })}
+              style={styles.picker}
+            >
+              <Picker.Item label="Any" value="Any" />
+              <Picker.Item label="Alberta" value="AB" />
+              <Picker.Item label="British Columbia" value="BC" />
+              <Picker.Item label="Manitoba" value="MB" />
+              <Picker.Item label="New Brunswick" value="NB" />
+              <Picker.Item label="Newfoundland and Labrador" value="NL" />
+              <Picker.Item label="Northwest Territories" value="NT" />
+              <Picker.Item label="Nova Scotia" value="NS" />
+              <Picker.Item label="Nunavut" value="NU" />
+              <Picker.Item label="Ontario" value="ON" />
+              <Picker.Item label="Prince Edward Island" value="PE" />
+              <Picker.Item label="Quebec" value="QC" />
+              <Picker.Item label="Saskatchewan" value="SK" />
+              <Picker.Item label="Yukon" value="YT" />
             </Picker>
             <Text style={styles.filterLabel}>Distance (km)</Text>
             <Slider
@@ -178,19 +189,18 @@ const JobSearchScreen = () => {
               maximumValue={100}
               step={1}
               value={filters.kmRange}
-              onValueChange={value => setFilters({ ...filters, kmRange: value })}
-              minimumTrackTintColor="dodgerblue"
-              maximumTrackTintColor="#d3d3d3"
+              onValueChange={kmRange => setFilters({ ...filters, kmRange })}
             />
-            <Text>{filters.kmRange} km</Text>
-            <Button
-              title="Apply Filters"
+            <Text>Distance: {filters.kmRange} km</Text>
+            <TouchableOpacity
+              style={styles.applyFilterButton}
               onPress={() => {
                 fetchJobs();
                 setModalVisible(false);
               }}
-              buttonStyle={styles.applyFilterButton}
-            />
+            >
+              <Text style={styles.applyFilterButtonText}>Apply Filters</Text>
+            </TouchableOpacity>
           </View>
         </View>
       </Modal>
@@ -201,8 +211,8 @@ const JobSearchScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
     padding: 16,
+    backgroundColor: '#fff',
   },
   searchContainer: {
     flexDirection: 'row',
@@ -214,15 +224,14 @@ const styles = StyleSheet.create({
     height: 40,
     borderColor: '#ddd',
     borderWidth: 1,
-    paddingHorizontal: 10,
-    borderRadius: 5,
-    marginRight: 10,
+    borderRadius: 4,
+    paddingHorizontal: 8,
   },
   searchButton: {
     backgroundColor: 'dodgerblue',
-    paddingHorizontal: 12,
-    paddingVertical: 10,
-    borderRadius: 5,
+    padding: 10,
+    borderRadius: 4,
+    marginLeft: 10,
   },
   filterContainer: {
     flexDirection: 'row',
@@ -231,23 +240,29 @@ const styles = StyleSheet.create({
   },
   filterButton: {
     backgroundColor: 'dodgerblue',
-    paddingHorizontal: 16,
-    paddingVertical: 10,
-    borderRadius: 5,
+    padding: 10,
+    borderRadius: 4,
   },
   viewToggleButton: {
     backgroundColor: 'dodgerblue',
-    paddingHorizontal: 16,
-    paddingVertical: 10,
-    borderRadius: 5,
+    padding: 10,
+    borderRadius: 4,
+  },
+  loadingText: {
+    textAlign: 'center',
+    fontSize: 16,
+  },
+  errorText: {
+    textAlign: 'center',
+    fontSize: 16,
+    color: 'red',
   },
   jobContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'center',
-    padding: 10,
-    borderBottomWidth: 1,
+    padding: 16,
     borderBottomColor: '#ddd',
+    borderBottomWidth: 1,
   },
   jobDetails: {
     flex: 1,
@@ -258,36 +273,35 @@ const styles = StyleSheet.create({
   },
   jobCompany: {
     fontSize: 14,
-    color: 'gray',
+    color: '#555',
   },
   jobLocation: {
-    fontSize: 12,
-    color: 'gray',
+    fontSize: 14,
+    color: '#777',
   },
   applyButton: {
     backgroundColor: 'dodgerblue',
-    paddingVertical: 5,
-    paddingHorizontal: 10,
-    borderRadius: 5,
+    padding: 10,
+    borderRadius: 4,
   },
   applyText: {
     color: 'white',
+    fontWeight: 'bold',
   },
   map: {
     flex: 1,
-    width: Dimensions.get('window').width,
-    height: Dimensions.get('window').height,
+    width: '100%',
   },
   modalContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: 'rgba(0,0,0,0.5)',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
   },
   modalContent: {
-    width: '90%',
-    backgroundColor: 'white',
+    width: '80%',
     padding: 20,
+    backgroundColor: 'white',
     borderRadius: 10,
   },
   modalTitle: {
@@ -297,7 +311,6 @@ const styles = StyleSheet.create({
   },
   filterLabel: {
     fontSize: 16,
-    fontWeight: 'bold',
     marginVertical: 10,
   },
   picker: {
@@ -306,21 +319,19 @@ const styles = StyleSheet.create({
   },
   slider: {
     width: '100%',
+    height: 40,
     marginVertical: 10,
   },
   applyFilterButton: {
     backgroundColor: 'dodgerblue',
+    padding: 10,
+    borderRadius: 4,
     marginTop: 20,
   },
-  loadingText: {
+  applyFilterButtonText: {
+    color: 'white',
     textAlign: 'center',
-    fontSize: 16,
-    color: 'gray',
-  },
-  errorText: {
-    textAlign: 'center',
-    fontSize: 16,
-    color: 'red',
+    fontWeight: 'bold',
   },
 });
 
