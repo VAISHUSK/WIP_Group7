@@ -7,6 +7,7 @@ import SignUpScreen from './screens/SignUpScreen';
 import LandingScreen from './screens/LandingScreen';
 import EmployerTabNavigator from './screens/EmployerTabNavigator';
 import EmployeeTabNavigator from './screens/EmployeeTabNavigator';
+import JobDetailsScreen from './screens/JobDetailsScreen'; // Import JobDetailsScreen
 
 const Stack = createStackNavigator();
 
@@ -27,17 +28,31 @@ const App = () => {
             <Stack.Screen name="SignUp" component={SignUpScreen} options={{ title: 'Sign Up' }} />
           </>
         ) : user.userType === 'employer' ? (
-          <Stack.Screen
-            name="EmployerTabNavigator"
-            component={EmployerTabNavigator}
-            options={{ headerShown: false }}
-          />
+          <>
+            <Stack.Screen
+              name="EmployerTabNavigator"
+              component={EmployerTabNavigator}
+              options={{ headerShown: false }}
+            />
+            <Stack.Screen
+              name="JobDetails"
+              component={JobDetailsScreen}
+              options={{ title: 'Job Details' }}
+            />
+          </>
         ) : user.userType === 'employee' ? (
-          <Stack.Screen
-            name="EmployeeTabNavigator"
-            component={EmployeeTabNavigator}
-            options={{ headerShown: false }}
-          />
+          <>
+            <Stack.Screen
+              name="EmployeeTabNavigator"
+              component={EmployeeTabNavigator}
+              options={{ headerShown: false }}
+            />
+            <Stack.Screen
+              name="JobDetails"
+              component={JobDetailsScreen}
+              options={{ title: 'Job Details' }}
+            />
+          </>
         ) : (
           <Stack.Screen name="Login" component={LoginScreen} options={{ title: 'Login' }} />
         )}

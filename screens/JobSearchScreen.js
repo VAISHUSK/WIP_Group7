@@ -6,6 +6,7 @@ import { Ionicons } from '@expo/vector-icons';
 import MapView, { Marker } from 'react-native-maps';
 import Slider from '@react-native-community/slider';
 import { Picker } from '@react-native-picker/picker';
+import { useNavigation } from '@react-navigation/native';
 
 const JobSearchScreen = () => {
   const [searchQuery, setSearchQuery] = useState('');
@@ -27,6 +28,8 @@ const JobSearchScreen = () => {
     latitudeDelta: 0.0922,
     longitudeDelta: 0.0421,
   });
+
+  const navigation = useNavigation();
 
   useEffect(() => {
     fetchJobs();
@@ -60,7 +63,10 @@ const JobSearchScreen = () => {
   };
 
   const renderJob = ({ item }) => (
-    <TouchableOpacity style={styles.jobContainer}>
+    <TouchableOpacity
+      style={styles.jobContainer}
+      onPress={() => navigation.navigate('JobDetails', { jobId: item.id })}
+    >
       <View style={styles.jobDetails}>
         <Text style={styles.jobTitle}>{item.title}</Text>
         <Text style={styles.jobCompany}>{item.company}</Text>
