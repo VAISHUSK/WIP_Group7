@@ -1,7 +1,9 @@
-import React from 'react';
+// App.js
+import React, { useEffect } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import { UserProvider, useUser } from './UserContext'; // Import UserContext
+import { setupNotifications } from './PushNotificationService'; // Import notifications setup
 import LoginScreen from './screens/LoginScreen';
 import SignUpScreen from './screens/SignUpScreen';
 import LandingScreen from './screens/LandingScreen';
@@ -22,6 +24,10 @@ const Stack = createStackNavigator();
 
 const App = () => {
   const { user, loading } = useUser();
+
+  useEffect(() => {
+    setupNotifications();
+  }, []);
 
   if (loading) {
     return (
