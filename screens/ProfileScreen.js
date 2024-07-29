@@ -1,10 +1,32 @@
-import React from 'react';
-import { View, StyleSheet, ScrollView } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, StyleSheet, ScrollView, ActivityIndicator } from 'react-native';
 import { Text, Avatar, Button, Divider, Icon } from 'react-native-elements';
-import { auth } from '../firebaseConfig'; // Import auth from your firebaseConfig
+import { auth, db } from '../firebaseConfig'; // Import auth and db from your firebaseConfig
+import { doc, getDoc } from 'firebase/firestore'; // Import necessary Firestore methods
 
 const ProfileScreen = ({ navigation }) => {
+  const [userData, setUserData] = useState(null);
+  const [loading, setLoading] = useState(true);
   const user = auth.currentUser;
+
+  useEffect(() => {
+    const fetchUserData = async () => {
+      if (user) {
+        try {
+          const userDoc = await getDoc(doc(db, 'Users', user.uid)); // Fetch the document from Firestore
+          if (userDoc.exists()) {
+            setUserData(userDoc.data());
+          }
+        } catch (error) {
+          console.error('Error fetching user data: ', error);
+        } finally {
+          setLoading(false);
+        }
+      }
+    };
+
+    fetchUserData();
+  }, [user]);
 
   const handleLogout = async () => {
     try {
@@ -15,6 +37,24 @@ const ProfileScreen = ({ navigation }) => {
     }
   };
 
+  const handleEditProfile = () => {
+    navigation.navigate('EditProfile');
+  };
+
+  if (loading) {
+    return <ActivityIndicator size="large" color="#0000ff" style={{ flex: 1 }} />;
+  }
+
+  const {
+    photoURL = require('../assets/default-avatar.png'),
+    displayName = 'User Name',
+    email = 'User Email',
+    phoneNumber = 'Phone Number',
+    address = 'Address',
+    jobTitle = 'Job Title',
+    bio = 'Bio',
+  } = userData || {};
+
   return (
     <ScrollView contentContainerStyle={styles.scrollContainer}>
       <View style={styles.container}>
@@ -22,43 +62,41 @@ const ProfileScreen = ({ navigation }) => {
         <Avatar
           size="xlarge"
           rounded
-          source={user ? { uri: user.photoURL } : null} // Use user's photo URL if available
+          source={{ uri: photoURL }}
           containerStyle={styles.avatar}
-        >
-          <Avatar.Accessory size={30} />
-        </Avatar>
-        <Text style={styles.userName}>{user ? user.displayName : 'User Name'}</Text>
-        <Text style={styles.email}>{user ? user.email : 'User Email'}</Text>
+        />
+        <Text style={styles.userName}>{displayName}</Text>
+        <Text style={styles.email}>{email}</Text>
         <Divider style={styles.divider} />
 
         <View style={styles.infoContainer}>
           <Icon name="phone" type="font-awesome" color="gray" style={styles.icon} />
-          <Text style={styles.infoText}>+123 456 7890</Text>
+          <Text style={styles.infoText}>{phoneNumber}</Text>
         </View>
         <View style={styles.infoContainer}>
           <Icon name="map-marker" type="font-awesome" color="gray" style={styles.icon} />
-          <Text style={styles.infoText}>123 Job Street, Employment City, Jobland</Text>
+          <Text style={styles.infoText}>{address}</Text>
         </View>
         <View style={styles.infoContainer}>
           <Icon name="briefcase" type="font-awesome" color="gray" style={styles.icon} />
-          <Text style={styles.infoText}>Software Developer at TechCorp</Text>
+          <Text style={styles.infoText}>{jobTitle}</Text>
         </View>
 
         <Text style={styles.bioHeader}>Bio</Text>
-        <Text style={styles.bioText}>
-          Experienced software developer with a passion for building innovative solutions. Skilled in React Native, JavaScript, and Firebase.
-        </Text>
+        <Text style={styles.bioText}>{bio}</Text>
         <Divider style={styles.divider} />
 
         <Button
           title="Edit Profile"
-          onPress={() => navigation.navigate('EditProfile')}
+          onPress={handleEditProfile}
           buttonStyle={styles.editButton}
+          containerStyle={styles.buttonContainer}
         />
         <Button
           title="Logout"
           onPress={handleLogout}
           buttonStyle={styles.logoutButton}
+          containerStyle={styles.buttonContainer}
         />
       </View>
     </ScrollView>
@@ -68,7 +106,7 @@ const ProfileScreen = ({ navigation }) => {
 const styles = StyleSheet.create({
   scrollContainer: {
     flexGrow: 1,
-    backgroundColor: '#fff',
+    backgroundColor: '#f8f8f8',
     paddingVertical: 20,
   },
   container: {
@@ -87,8 +125,8 @@ const styles = StyleSheet.create({
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
-    shadowRadius: 2,
-    elevation: 2,
+    shadowRadius: 4,
+    elevation: 3,
   },
   userName: {
     fontSize: 22,
@@ -132,15 +170,16 @@ const styles = StyleSheet.create({
     marginBottom: 20,
     textAlign: 'left',
   },
+  buttonContainer: {
+    width: '100%',
+    marginBottom: 10,
+  },
   editButton: {
     backgroundColor: 'dodgerblue',
-    width: 200,
     borderRadius: 5,
-    marginBottom: 10,
   },
   logoutButton: {
     backgroundColor: 'crimson',
-    width: 200,
     borderRadius: 5,
   },
 });

@@ -9,6 +9,11 @@ import EmployerTabNavigator from './screens/EmployerTabNavigator';
 import EmployeeTabNavigator from './screens/EmployeeTabNavigator';
 import JobDetailsScreen from './screens/JobDetailsScreen'; // Import JobDetailsScreen
 import ApplyJobScreen from './screens/ApplyJobScreen'; // Import ApplyJobScreen
+import AddJobScreen from './screens/AddJobScreen'; // Import AddJobScreen
+import CompanyDetailsScreen from './screens/CompanyDetailsScreen'; // Import CompanyDetailsScreen
+import ProfileScreen from './screens/ProfileScreen'; // Import ProfileScreen
+import EditProfileScreen from './screens/EditProfileScreen'; // Import EditProfileScreen
+import { ActivityIndicator, View } from 'react-native'; // Import ActivityIndicator for loading state
 
 const Stack = createStackNavigator();
 
@@ -16,7 +21,11 @@ const App = () => {
   const { user, loading } = useUser();
 
   if (loading) {
-    return null; // Or a loading spinner
+    return (
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+        <ActivityIndicator size="large" color="#0000ff" />
+      </View>
+    ); // Loading spinner while checking authentication state
   }
 
   return (
@@ -45,6 +54,26 @@ const App = () => {
               component={ApplyJobScreen}
               options={{ title: 'Apply for Job' }}
             />
+            <Stack.Screen
+              name="AddJob"
+              component={AddJobScreen}
+              options={{ title: 'Add Job' }}
+            />
+            <Stack.Screen
+              name="CompanyDetails"
+              component={CompanyDetailsScreen}
+              options={{ title: 'Company Details' }}
+            />
+            <Stack.Screen
+              name="Profile"
+              component={ProfileScreen}
+              options={{ title: 'Profile' }}
+            />
+            <Stack.Screen
+              name="EditProfile"
+              component={EditProfileScreen}
+              options={{ title: 'Edit Profile' }}
+            />
           </>
         ) : user.userType === 'employee' ? (
           <>
@@ -62,6 +91,26 @@ const App = () => {
               name="ApplyJobScreen"
               component={ApplyJobScreen}
               options={{ title: 'Apply for Job' }}
+            />
+            <Stack.Screen
+              name="AddJob"
+              component={AddJobScreen}
+              options={{ title: 'Add Job' }}
+            />
+            <Stack.Screen
+              name="CompanyDetails"
+              component={CompanyDetailsScreen}
+              options={{ title: 'Company Details' }}
+            />
+            <Stack.Screen
+              name="Profile"
+              component={ProfileScreen}
+              options={{ title: 'Profile' }}
+            />
+            <Stack.Screen
+              name="EditProfile"
+              component={EditProfileScreen}
+              options={{ title: 'Edit Profile' }}
             />
           </>
         ) : (

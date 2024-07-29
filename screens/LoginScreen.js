@@ -1,14 +1,16 @@
 import React, { useState } from 'react';
-import { View, TextInput, Pressable, Text, StyleSheet, Image, TouchableOpacity, Modal, Button } from 'react-native';
+import { View, TextInput, Button, StyleSheet, Image, Text, TouchableOpacity, Modal, Alert } from 'react-native';
 import { signInWithEmailAndPassword, sendPasswordResetEmail } from 'firebase/auth';
 import { doc, getDoc } from 'firebase/firestore';
 import { auth, db } from '../firebaseConfig';
+import { useNavigation } from '@react-navigation/native';
 
-const LoginScreen = ({ navigation }) => {
+const LoginScreen = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [modalVisible, setModalVisible] = useState(false);
+  const navigation = useNavigation();
 
   const validateEmail = (email) => {
     const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -73,18 +75,18 @@ const LoginScreen = ({ navigation }) => {
     }
   };
 
-  const onForgotPassword = async () => {
+  const handleForgotPassword = async () => {
     if (!validateEmail(email)) {
-      setError('Please enter a valid email address to reset your password');
+      setError('Please enter a valid email address');
       setModalVisible(true);
       return;
     }
 
     try {
       await sendPasswordResetEmail(auth, email);
-      Alert.alert('Success', 'Password reset email sent. Please check your inbox.');
+      Alert.alert("Success", "Password reset email sent!");
     } catch (error) {
-      setError('Failed to send password reset email. Please try again.');
+      setError(error.message);
       setModalVisible(true);
     }
   };
@@ -110,11 +112,11 @@ const LoginScreen = ({ navigation }) => {
         autoCapitalize="none"
       />
       <Button title="Login" onPress={onLogin} color="black" />
-      <TouchableOpacity onPress={onForgotPassword}>
-        <Text style={styles.forgotPasswordText}>Forgot Password?</Text>
-      </TouchableOpacity>
       <TouchableOpacity onPress={() => navigation.navigate('SignUp')}>
         <Text style={styles.signupText}>Don't have an account? Sign Up</Text>
+      </TouchableOpacity>
+      <TouchableOpacity onPress={handleForgotPassword}>
+        <Text style={styles.forgotPasswordText}>Forgot Password?</Text>
       </TouchableOpacity>
 
       <Modal
@@ -168,15 +170,15 @@ const styles = StyleSheet.create({
     paddingHorizontal: 8,
     borderRadius: 5,
   },
-  forgotPasswordText: {
-    color: 'blue',
-    textAlign: 'center',
-    marginTop: 20,
-  },
   signupText: {
     color: 'blue',
     textAlign: 'center',
     marginTop: 20,
+  },
+  forgotPasswordText: {
+    color: 'blue',
+    textAlign: 'center',
+    marginTop: 10,
   },
   modalContainer: {
     flex: 1,
