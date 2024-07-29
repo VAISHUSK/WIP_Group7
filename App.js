@@ -8,6 +8,7 @@ import LandingScreen from './screens/LandingScreen';
 import EmployerTabNavigator from './screens/EmployerTabNavigator';
 import EmployeeTabNavigator from './screens/EmployeeTabNavigator';
 import JobDetailsScreen from './screens/JobDetailsScreen'; // Import JobDetailsScreen
+import ApplyJobScreen from './screens/ApplyJobScreen'; // Import ApplyJobScreen
 
 const Stack = createStackNavigator();
 
@@ -39,6 +40,11 @@ const App = () => {
               component={JobDetailsScreen}
               options={{ title: 'Job Details' }}
             />
+            <Stack.Screen
+              name="ApplyJobScreen"
+              component={ApplyJobScreen}
+              options={{ title: 'Apply for Job' }}
+            />
           </>
         ) : user.userType === 'employee' ? (
           <>
@@ -51,6 +57,11 @@ const App = () => {
               name="JobDetails"
               component={JobDetailsScreen}
               options={{ title: 'Job Details' }}
+            />
+            <Stack.Screen
+              name="ApplyJobScreen"
+              component={ApplyJobScreen}
+              options={{ title: 'Apply for Job' }}
             />
           </>
         ) : (

@@ -1,12 +1,13 @@
 // JobDetailsScreen.js
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView, Button, Image } from 'react-native';
-import { useRoute } from '@react-navigation/native';
+import { useRoute, useNavigation } from '@react-navigation/native';
 import { doc, getDoc } from 'firebase/firestore';
 import { db } from '../firebaseConfig'; // Ensure this import matches your file structure
 
 const JobDetailsScreen = () => {
   const route = useRoute();
+  const navigation = useNavigation(); // Access navigation prop
   const { jobId } = route.params || {}; // Extract jobId from params
 
   const [job, setJob] = useState(null);
@@ -40,6 +41,12 @@ const JobDetailsScreen = () => {
 
     fetchJobDetails();
   }, [jobId]);
+
+  const handleApplyNow = () => {
+    if (job) {
+      navigation.navigate('ApplyJobScreen', { jobId }); // Navigate to ApplyJobScreen with jobId
+    }
+  };
 
   if (loading) {
     return (
@@ -86,7 +93,7 @@ const JobDetailsScreen = () => {
       </View>
 
       <View style={styles.buttonContainer}>
-        <Button title="Apply Now" onPress={() => {/* Add apply functionality here */}} />
+        <Button title="Apply Now" onPress={handleApplyNow} color="#007bff" />
       </View>
     </ScrollView>
   );

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, StyleSheet, Button } from 'react-native';
+import { View, Text, TextInput, StyleSheet, Button, ScrollView } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 import { db } from '../firebaseConfig';
 import { addDoc, collection } from 'firebase/firestore';
@@ -30,6 +30,12 @@ const AddJobScreen = () => {
   const [salary, setSalary] = useState('');
   const [latitude, setLatitude] = useState('');
   const [longitude, setLongitude] = useState('');
+  const [companyDetails, setCompanyDetails] = useState({
+    name: '',
+    address: '',
+    phone: '',
+    website: '',
+  });
 
   const handleSubmit = async () => {
     try {
@@ -42,6 +48,7 @@ const AddJobScreen = () => {
         salary,
         latitude: parseFloat(latitude),
         longitude: parseFloat(longitude),
+        companyDetails,
       });
       // Clear fields after submission
       setTitle('');
@@ -52,26 +59,26 @@ const AddJobScreen = () => {
       setSalary('');
       setLatitude('');
       setLongitude('');
+      setCompanyDetails({
+        name: '',
+        address: '',
+        phone: '',
+        website: '',
+      });
     } catch (error) {
       console.error('Error adding job:', error);
     }
   };
 
   return (
-    <View style={styles.container}>
+    <ScrollView contentContainerStyle={styles.container}>
+      <Text style={styles.sectionTitle}>Job Details</Text>
       <Text style={styles.label}>Job Title</Text>
       <TextInput
         style={styles.input}
         placeholder="Job Title"
         value={title}
         onChangeText={setTitle}
-      />
-      <Text style={styles.label}>Company</Text>
-      <TextInput
-        style={styles.input}
-        placeholder="Company Name"
-        value={company}
-        onChangeText={setCompany}
       />
       <Text style={styles.label}>Location</Text>
       <TextInput
@@ -124,16 +131,54 @@ const AddJobScreen = () => {
         onChangeText={setLongitude}
         keyboardType="numeric"
       />
+
+      <Text style={styles.sectionTitle}>Company Details</Text>
+      <Text style={styles.label}>Company Name</Text>
+      <TextInput
+        style={styles.input}
+        placeholder="Company Name"
+        value={companyDetails.name}
+        onChangeText={(text) => setCompanyDetails({ ...companyDetails, name: text })}
+      />
+      <Text style={styles.label}>Company Address</Text>
+      <TextInput
+        style={styles.input}
+        placeholder="Company Address"
+        value={companyDetails.address}
+        onChangeText={(text) => setCompanyDetails({ ...companyDetails, address: text })}
+      />
+      <Text style={styles.label}>Company Phone</Text>
+      <TextInput
+        style={styles.input}
+        placeholder="Company Phone"
+        value={companyDetails.phone}
+        onChangeText={(text) => setCompanyDetails({ ...companyDetails, phone: text })}
+        keyboardType="phone-pad"
+      />
+      <Text style={styles.label}>Company Website</Text>
+      <TextInput
+        style={styles.input}
+        placeholder="Company Website"
+        value={companyDetails.website}
+        onChangeText={(text) => setCompanyDetails({ ...companyDetails, website: text })}
+        keyboardType="url"
+      />
+
       <Button title="Add Job" onPress={handleSubmit} />
-    </View>
+    </ScrollView>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
+    flexGrow: 1,
     padding: 16,
     backgroundColor: '#fff',
+  },
+  sectionTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    marginBottom: 12,
   },
   label: {
     marginVertical: 8,
