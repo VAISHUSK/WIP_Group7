@@ -1,4 +1,3 @@
-// screens/EmployerTabNavigator.js
 import React from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Ionicons } from '@expo/vector-icons';
@@ -6,6 +5,7 @@ import { Ionicons } from '@expo/vector-icons';
 import CompanyAnalysisScreen from './CompanyAnalysisScreen'; // Import CompanyAnalysisScreen
 import AddJobScreen from './AddJobScreen';
 import ProfileScreen from './ProfileScreen';
+import ViewApplicationsScreen from './ViewApplicationsScreen'; // Import ViewApplicationsScreen
 
 const Tab = createBottomTabNavigator();
 
@@ -16,12 +16,22 @@ const EmployerTabNavigator = () => {
         tabBarIcon: ({ focused, color, size }) => {
           let iconName;
 
-          if (route.name === 'CompanyAnalysis') {
-            iconName = focused ? 'analytics' : 'analytics-outline'; // Assuming 'analytics' is the icon name
-          } else if (route.name === 'AddJob') {
-            iconName = focused ? 'add-circle' : 'add-circle-outline';
-          } else if (route.name === 'Profile') {
-            iconName = focused ? 'person' : 'person-outline';
+          switch (route.name) {
+            case 'CompanyAnalysis':
+              iconName = focused ? 'analytics' : 'analytics-outline';
+              break;
+            case 'AddJob':
+              iconName = focused ? 'add-circle' : 'add-circle-outline';
+              break;
+            case 'Profile':
+              iconName = focused ? 'person' : 'person-outline';
+              break;
+            case 'ViewApplications':
+              iconName = focused ? 'list' : 'list-outline'; // Updated icon for ViewApplications
+              break;
+            default:
+              iconName = 'home'; // Default icon
+              break;
           }
 
           return <Ionicons name={iconName} size={size} color={color} />;
@@ -35,6 +45,7 @@ const EmployerTabNavigator = () => {
       <Tab.Screen name="CompanyAnalysis" component={CompanyAnalysisScreen} />
       <Tab.Screen name="AddJob" component={AddJobScreen} />
       <Tab.Screen name="Profile" component={ProfileScreen} />
+      <Tab.Screen name="ViewApplications" component={ViewApplicationsScreen} />
     </Tab.Navigator>
   );
 };

@@ -1,29 +1,57 @@
-import React, { useState } from 'react';
-import { View, Text, TextInput, StyleSheet, Button, ScrollView, Image } from 'react-native';
-import { launchImageLibrary } from 'react-native-image-picker'; // For image selection
-import { addDoc, collection } from 'firebase/firestore';
-import { db } from '../firebaseConfig'; // Ensure this import matches your file structure
+import React, { useState, useEffect } from 'react';
+import { View, Text, TextInput, StyleSheet, Button, ScrollView, Alert } from 'react-native';
+import { addDoc, collection, getDoc, doc } from 'firebase/firestore';
+import { db } from '../firebaseConfig';
+import { useUser } from '../UserContext'; // Adjust the import path as needed
 
 const ApplyJobScreen = ({ route, navigation }) => {
-  const { jobId } = route.params || {}; // Extract jobId from params
+  const { jobId } = route.params || {};
+  const { user, loading } = useUser();
+
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
-  const [resume, setResume] = useState('');
-  const [coverLetter, setCoverLetter] = useState('');
-  const [selectedResume, setSelectedResume] = useState(null);
+  const [phone, setPhone] = useState('');
+  const [address, setAddress] = useState('');
+  const [education, setEducation] = useState('');
+  const [workExperience, setWorkExperience] = useState('');
+  const [skills, setSkills] = useState('');
   const [applying, setApplying] = useState(false);
+  const [createdBy, setCreatedBy] = useState('');
 
-  const handleResumeUpload = async () => {
-    const result = await launchImageLibrary({ mediaType: 'photo', quality: 1 });
-    if (!result.didCancel && result.assets && result.assets[0]) {
-      setSelectedResume(result.assets[0].uri);
-      setResume(result.assets[0].fileName);
+  useEffect(() => {
+    const fetchJobDetails = async () => {
+      try {
+        const jobRef = doc(db, 'jobs', jobId);
+        const jobDoc = await getDoc(jobRef);
+        if (jobDoc.exists()) {
+          const jobData = jobDoc.data();
+          setCreatedBy(jobData.createdBy);
+          console.log('Job Data:', jobData); // Logging job data
+          console.log('Created By:', jobData.createdBy); // Logging createdBy
+        } else {
+          console.log('No such job!');
+        }
+      } catch (error) {
+        console.error('Error fetching job details:', error);
+      }
+    };
+
+    fetchJobDetails();
+  }, [jobId]);
+
+  useEffect(() => {
+    if (user && !loading) {
+      setName(user.name || '');
+      setEmail(user.email || ''); // Ensure email is set from user context
+      setPhone(user.phone || '');
+      setAddress(user.address || '');
+      // Set other fields if they exist in the user data
     }
-  };
+  }, [user, loading]);
 
   const handleSubmit = async () => {
-    if (!name || !email) {
-      alert('Please fill out all required fields.');
+    if (!name || !email || !phone || !address || !education || !workExperience || !skills) {
+      Alert.alert('Missing Information', 'Please fill out all required fields.');
       return;
     }
 
@@ -32,29 +60,34 @@ const ApplyJobScreen = ({ route, navigation }) => {
       await addDoc(collection(db, 'applications'), {
         jobId,
         applicantName: name,
-        applicantEmail: email,
-        resume: resume || null, // Allow for resume to be optional
-        coverLetter,
+        applicantEmail: email, // Use the email from user context
+        phone,
+        address,
+        education,
+        workExperience,
+        skills,
+        createdBy, // Include the createdBy email address
+        status: 'Applied', // Set the status as 'Applied'
         timestamp: new Date(),
       });
 
-      alert('Application submitted successfully!');
-      navigation.goBack(); // Navigate back to previous screen after submission
+      Alert.alert('Success', 'Application submitted successfully!');
+      navigation.goBack();
     } catch (err) {
       console.error('Error submitting application:', err);
-      alert('Error submitting application. Please try again.');
+      Alert.alert('Error', 'Error submitting application. Please try again.');
     } finally {
       setApplying(false);
     }
   };
 
+  if (loading) {
+    return <Text>Loading...</Text>;
+  }
+
   return (
     <ScrollView style={styles.container}>
       <View style={styles.header}>
-        <Image
-          source={{ uri: 'https://via.placeholder.com/150' }} // Replace with relevant image or logo
-          style={styles.headerImage}
-        />
         <Text style={styles.headerText}>Apply for Job</Text>
       </View>
 
@@ -76,22 +109,45 @@ const ApplyJobScreen = ({ route, navigation }) => {
           onChangeText={setEmail}
         />
 
-        <Text style={styles.label}>Resume (Optional, PDF or DOC)</Text>
-        <View style={styles.resumeContainer}>
-          <Button title="Upload Resume" onPress={handleResumeUpload} />
-          {selectedResume && (
-            <Text style={styles.resumeText}>{resume}</Text>
-          )}
-        </View>
-
-        <Text style={styles.label}>Cover Letter</Text>
+        <Text style={styles.label}>Phone Number</Text>
         <TextInput
-          style={[styles.input, styles.coverLetter]}
-          placeholder="Write your cover letter here"
-          multiline
-          numberOfLines={4}
-          value={coverLetter}
-          onChangeText={setCoverLetter}
+          style={styles.input}
+          placeholder="Enter your phone number"
+          keyboardType="phone-pad"
+          value={phone}
+          onChangeText={setPhone}
+        />
+
+        <Text style={styles.label}>Address</Text>
+        <TextInput
+          style={[styles.input, styles.address]}
+          placeholder="Enter your address"
+          value={address}
+          onChangeText={setAddress}
+        />
+
+        <Text style={styles.label}>Education</Text>
+        <TextInput
+          style={[styles.input, styles.education]}
+          placeholder="Enter your education details"
+          value={education}
+          onChangeText={setEducation}
+        />
+
+        <Text style={styles.label}>Work Experience</Text>
+        <TextInput
+          style={[styles.input, styles.workExperience]}
+          placeholder="Enter your work experience"
+          value={workExperience}
+          onChangeText={setWorkExperience}
+        />
+
+        <Text style={styles.label}>Skills</Text>
+        <TextInput
+          style={[styles.input, styles.skills]}
+          placeholder="Enter your skills"
+          value={skills}
+          onChangeText={setSkills}
         />
 
         <Button
@@ -118,12 +174,6 @@ const styles = StyleSheet.create({
     borderBottomLeftRadius: 8,
     borderBottomRightRadius: 8,
   },
-  headerImage: {
-    width: 100,
-    height: 100,
-    borderRadius: 50,
-    marginBottom: 10,
-  },
   headerText: {
     fontSize: 24,
     color: '#fff',
@@ -149,15 +199,17 @@ const styles = StyleSheet.create({
     paddingHorizontal: 8,
     marginBottom: 16,
   },
-  coverLetter: {
-    height: 120,
+  address: {
+    height: 80, // Increased height for address field
   },
-  resumeContainer: {
-    marginBottom: 16,
+  education: {
+    height: 80, // Increased height for education field
   },
-  resumeText: {
-    marginTop: 8,
-    color: '#555',
+  workExperience: {
+    height: 120, // Increased height for work experience field
+  },
+  skills: {
+    height: 60, // Height for skills field
   },
 });
 

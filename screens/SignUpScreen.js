@@ -16,7 +16,8 @@ const SignUpScreen = () => {
   const [address, setAddress] = useState('');
   const [jobTitle, setJobTitle] = useState('');
   const [bio, setBio] = useState('');
-  const [userType, setUserType] = useState('employee');
+  const [fullName, setFullName] = useState(''); // Added fullName state
+  const [userType, setUserType] = useState('employer');
   const [profilePhoto, setProfilePhoto] = useState(null);
   const [error, setError] = useState('');
   const [modalVisible, setModalVisible] = useState(false);
@@ -33,6 +34,11 @@ const SignUpScreen = () => {
   };
 
   const validateInput = () => {
+    if (!fullName) {
+      setError('Full Name is required');
+      setModalVisible(true);
+      return false;
+    }
     if (!username) {
       setError('Username is required');
       setModalVisible(true);
@@ -91,6 +97,7 @@ const SignUpScreen = () => {
       }
 
       await setDoc(doc(db, 'Users', user.uid), {
+        fullName,
         username,
         email,
         phoneNumber,
@@ -103,12 +110,12 @@ const SignUpScreen = () => {
 
       if (profilePhotoURL) {
         await user.updateProfile({
-          displayName: username,
+          displayName: fullName,
           photoURL: profilePhotoURL,
         });
       } else {
         await user.updateProfile({
-          displayName: username,
+          displayName: fullName,
         });
       }
 
@@ -128,6 +135,13 @@ const SignUpScreen = () => {
       <View style={styles.container}>
         <Image source={require('../assets/logo.png')} style={styles.logo} />
         <Text style={styles.title}>Join Us</Text>
+        <TextInput
+          style={styles.input}
+          placeholder="Full Name"
+          value={fullName}
+          onChangeText={setFullName}
+          autoCapitalize="words"
+        />
         <TextInput
           style={styles.input}
           placeholder="Username"
@@ -286,18 +300,15 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+    backgroundColor: 'rgba(0,0,0,0.5)',
   },
   modalView: {
-    margin: 20,
     backgroundColor: 'white',
     borderRadius: 10,
-    padding: 35,
+    padding: 20,
     alignItems: 'center',
     shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
+    shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.25,
     shadowRadius: 4,
     elevation: 5,
@@ -307,7 +318,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   closeButton: {
-    backgroundColor: 'black',
+    backgroundColor: '#2196F3',
     borderRadius: 5,
     padding: 10,
     elevation: 2,

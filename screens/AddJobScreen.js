@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, StyleSheet, Button, FlatList, KeyboardAvoidingView, Platform } from 'react-native';
+import { View, Text, TextInput, StyleSheet, Button, FlatList, KeyboardAvoidingView, Platform, Modal, TouchableOpacity } from 'react-native';
 import { GooglePlacesAutocomplete } from 'react-native-google-places-autocomplete';
 import Geocoder from 'react-native-geocoding';
 import { Picker } from '@react-native-picker/picker';
@@ -34,6 +34,9 @@ const AddJobScreen = ({ navigation }) => {
   const [latitude, setLatitude] = useState('');
   const [longitude, setLongitude] = useState('');
   const [city, setCity] = useState('');
+  const [description, setDescription] = useState('');
+  const [modalVisible, setModalVisible] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
 
   const handleAddressSelect = async (data, details) => {
     const address = data.description;
@@ -60,19 +63,30 @@ const AddJobScreen = ({ navigation }) => {
     }
   };
 
+  const validateFields = () => {
+    if (!title || !company || !location || province === 'Any' || !salary || !description) {
+      setErrorMessage('Please fill all required fields.');
+      setModalVisible(true);
+      return false;
+    }
+    return true;
+  };
+
   const handleSubmit = () => {
-    // Navigate to the next screen to handle company details
-    navigation.navigate('CompanyDetails', {
-      title,
-      company,
-      location,
-      province,
-      city,
-      type,
-      salary,
-      latitude,
-      longitude,
-    });
+    if (validateFields()) {
+      navigation.navigate('CompanyDetails', {
+        title,
+        company,
+        location,
+        province,
+        city,
+        type,
+        salary,
+        description,
+        latitude,
+        longitude,
+      });
+    }
   };
 
   return (
@@ -93,13 +107,25 @@ const AddJobScreen = ({ navigation }) => {
               />
             </View>
           )},
+          { key: 'Company Name', component: (
+            <View style={styles.section}>
+              <Text style={styles.label}>Company Name</Text>
+              <TextInput
+                style={styles.input}
+                placeholder="Company Name"
+                value={company}
+                onChangeText={setCompany}
+              />
+            </View>
+          )},
           { key: 'Location', component: (
             <View style={styles.section}>
               <Text style={styles.label}>Location</Text>
-              <GooglePlacesAutocomplete
-                placeholder='Search for an address'
+              <GooglePlacesAutocomplete  
+                placeholder='Search for an address'        
                 onPress={handleAddressSelect}
-                query={{ key: 'AIzaSyDi08rJ4cV1T-rTcvmWv5Nk_0o6AYfOyGw', language: 'en' }} // Replace with your API Key
+                fetchDetails={true}
+                query={{ key: 'AIzaSyDi08rJ4cV1T-rTcvmWv5Nk_0o6AYfOyGw', language: 'en' }} 
                 styles={{ textInput: styles.input }}
               />
             </View>
@@ -112,6 +138,7 @@ const AddJobScreen = ({ navigation }) => {
                 placeholder="City"
                 value={city}
                 onChangeText={setCity}
+                editable={false} 
               />
             </View>
           )},
@@ -158,39 +185,47 @@ const AddJobScreen = ({ navigation }) => {
               />
             </View>
           )},
-          { key: 'Latitude', component: (
+          { key: 'Job Description', component: (
             <View style={styles.section}>
-              <Text style={styles.label}>Latitude</Text>
+              <Text style={styles.label}>Job Description</Text>
               <TextInput
-                style={styles.input}
-                placeholder="Latitude"
-                value={latitude}
-                onChangeText={setLatitude}
-                keyboardType="numeric"
-              />
-            </View>
-          )},
-          { key: 'Longitude', component: (
-            <View style={styles.section}>
-              <Text style={styles.label}>Longitude</Text>
-              <TextInput
-                style={styles.input}
-                placeholder="Longitude"
-                value={longitude}
-                onChangeText={setLongitude}
-                keyboardType="numeric"
+                style={[styles.input, styles.textArea]}
+                placeholder="Job Description"
+                value={description}
+                onChangeText={setDescription}
+                multiline={true}
               />
             </View>
           )},
           { key: 'Submit', component: (
             <View style={styles.section}>
-              <Button title="Next" onPress={handleSubmit} />
+              <Button title="Next" onPress={handleSubmit} color="#2196F3" />
             </View>
           )},
         ]}
         renderItem={({ item }) => item.component}
         keyExtractor={item => item.key}
       />
+
+      {/* Error Modal */}
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={modalVisible}
+        onRequestClose={() => setModalVisible(!modalVisible)}
+      >
+        <View style={styles.modalContainer}>
+          <View style={styles.modalView}>
+            <Text style={styles.modalText}>{errorMessage}</Text>
+            <TouchableOpacity
+              style={styles.closeButton}
+              onPress={() => setModalVisible(!modalVisible)}
+            >
+              <Text style={styles.textStyle}>Close</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
     </KeyboardAvoidingView>
   );
 };
@@ -198,28 +233,66 @@ const AddJobScreen = ({ navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 16,
+    padding: 20,
     backgroundColor: '#fff',
   },
   section: {
-    marginBottom: 32,
+    marginVertical: 10,
   },
   label: {
-    marginVertical: 8,
-    fontSize: 16,
+    fontWeight: 'bold',
+    marginBottom: 5,
   },
   input: {
-    height: 40,
-    borderColor: '#ddd',
     borderWidth: 1,
-    borderRadius: 4,
-    paddingHorizontal: 8,
-    marginBottom: 16,
+    borderColor: '#ccc',
+    borderRadius: 5,
+    padding: 10,
+  },
+  textArea: {
+    height: 100,
+    textAlignVertical: 'top',
   },
   picker: {
     height: 50,
-    width: '100%',
-    marginBottom: 16,
+    borderColor: '#ccc',
+    borderWidth: 1,
+    borderRadius: 5,
+    padding: 10,
+  },
+  modalContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0,0,0,0.5)',
+  },
+  modalView: {
+    margin: 20,
+    backgroundColor: 'white',
+    borderRadius: 10,
+    padding: 35,
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5,
+  },
+  modalText: {
+    marginBottom: 15,
+    textAlign: 'center',
+    color:'red',
+  },
+  closeButton: {
+    backgroundColor: 'black',
+    borderRadius: 5,
+    padding: 10,
+    elevation: 2,
+  },
+  textStyle: {
+    color: 'white',
+    fontWeight: 'bold',
+    textAlign: 'center',
   },
 });
 

@@ -14,6 +14,8 @@ import CompanyDetailsScreen from './screens/CompanyDetailsScreen'; // Import Com
 import CompanyAnalysisScreen from './screens/CompanyAnalysisScreen'; // Import CompanyAnalysisScreen
 import ProfileScreen from './screens/ProfileScreen'; // Import ProfileScreen
 import EditProfileScreen from './screens/EditProfileScreen'; // Import EditProfileScreen
+import ViewApplicationsScreen from './screens/ViewApplicationsScreen'; // Import ViewApplicationsScreen
+import ApplicationDetailsScreen from './screens/ApplicationDetailsScreen'; // Import ApplicationDetailsScreen
 import { ActivityIndicator, View } from 'react-native'; // Import ActivityIndicator for loading state
 
 const Stack = createStackNavigator();
@@ -80,6 +82,16 @@ const App = () => {
               component={EditProfileScreen}
               options={{ title: 'Edit Profile' }}
             />
+            <Stack.Screen
+              name="ViewApplications"
+              component={ViewApplicationsScreen}
+              options={{ title: 'View Applications' }}
+            />
+            <Stack.Screen
+              name="ApplicationDetails"
+              component={ApplicationDetailsScreen}
+              options={{ title: 'Application Details' }}
+            />
           </>
         ) : user.userType === 'employee' ? (
           <>
@@ -122,6 +134,11 @@ const App = () => {
               name="EditProfile"
               component={EditProfileScreen}
               options={{ title: 'Edit Profile' }}
+            />
+            <Stack.Screen
+              name="ApplicationDetails"
+              component={ApplicationDetailsScreen}
+              options={{ title: 'Application Details' }}
             />
           </>
         ) : (

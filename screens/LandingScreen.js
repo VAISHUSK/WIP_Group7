@@ -1,12 +1,60 @@
-import React from 'react';
-import { View, Text, Pressable, StyleSheet, TextInput, Image } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, Pressable, StyleSheet, TextInput, Image, FlatList } from 'react-native';
+import { collection, query, where, getDocs } from 'firebase/firestore';
+import { db } from '../firebaseConfig';
+import { useUser } from '../UserContext'; // Import the useUser hook
 
 const LandingScreen = ({ navigation }) => {
-  const [searchQuery, setSearchQuery] = React.useState('');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [filteredJobs, setFilteredJobs] = useState([]);
+  const [suggestions, setSuggestions] = useState([]);
+  const { user, loading } = useUser(); // Access user and loading state from context
+
+  useEffect(() => {
+    fetchSuggestions();
+  }, [searchQuery]);
+
+  const fetchSuggestions = async () => {
+    if (searchQuery.length < 1) {
+      setSuggestions([]);
+      return;
+    }
+
+    try {
+      const q = query(
+        collection(db, 'jobs'),
+        where('title', '>=', searchQuery),
+        where('title', '<=', searchQuery + '\uf8ff')
+      );
+      const querySnapshot = await getDocs(q);
+      const suggestionsList = querySnapshot.docs.map(doc => doc.data().title);
+      setSuggestions(suggestionsList);
+    } catch (error) {
+      console.error('Error fetching suggestions:', error);
+    }
+  };
 
   const handleSearch = () => {
-    console.log('Searching for:', searchQuery);
+    if (searchQuery.trim()) {
+      // Navigate to job listings screen with the search query
+      navigation.navigate('JobListings', { query: searchQuery });
+    }
   };
+
+  const handleSuggestionPress = (title) => {
+    if (user) {
+      // Navigate to job listings screen with the selected suggestion
+      navigation.navigate('JobListings', { query: title });
+    } else {
+      // Redirect to login screen if not logged in
+      navigation.navigate('Login');
+    }
+  };
+
+  if (loading) {
+    // Optionally display a loading spinner or message while loading
+    return <View style={styles.container}><Text>Loading...</Text></View>;
+  }
 
   return (
     <View style={styles.container}>
@@ -20,19 +68,24 @@ const LandingScreen = ({ navigation }) => {
           onChangeText={setSearchQuery}
         />
         <Pressable style={styles.searchButton} onPress={handleSearch}>
-          <Text style={styles.searchButtonText}>Search</Text>
+          <Text style={styles.buttonText}>Search</Text>
         </Pressable>
       </View>
-      <Pressable
-        style={styles.button}
-        onPress={() => navigation.navigate('Login')}
-      >
+      {searchQuery ? (
+        <FlatList
+          data={suggestions}
+          keyExtractor={(item, index) => index.toString()}
+          renderItem={({ item }) => (
+            <Pressable style={styles.suggestion} onPress={() => handleSuggestionPress(item)}>
+              <Text>{item}</Text>
+            </Pressable>
+          )}
+        />
+      ) : null}
+      <Pressable style={styles.button} onPress={() => navigation.navigate('Login')}>
         <Text style={styles.buttonText}>Login</Text>
       </Pressable>
-      <Pressable
-        style={styles.button}
-        onPress={() => navigation.navigate('SignUp')}
-      >
+      <Pressable style={styles.button} onPress={() => navigation.navigate('SignUp')}>
         <Text style={styles.buttonText}>Sign Up</Text>
       </Pressable>
     </View>
@@ -61,6 +114,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     marginBottom: 20,
+    width: '100%',
   },
   input: {
     flex: 1,
@@ -69,16 +123,21 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     padding: 10,
     borderRadius: 5,
+    backgroundColor: '#fff',
   },
   searchButton: {
     backgroundColor: 'black',
-    marginLeft: 10,
-    padding: 10,
+    padding: 15,
     borderRadius: 5,
+    marginLeft: 10,
+    alignItems: 'center',
   },
-  searchButtonText: {
-    color: 'white',
-    fontWeight: 'bold',
+  suggestion: {
+    backgroundColor: '#fff',
+    padding: 10,
+    marginVertical: 5,
+    borderRadius: 5,
+    width: '100%',
   },
   button: {
     backgroundColor: 'black',

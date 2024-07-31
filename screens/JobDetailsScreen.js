@@ -1,14 +1,13 @@
-// JobDetailsScreen.js
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, ScrollView, Button, Image } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, Button, Image, TouchableOpacity } from 'react-native';
 import { useRoute, useNavigation } from '@react-navigation/native';
 import { doc, getDoc } from 'firebase/firestore';
 import { db } from '../firebaseConfig'; // Ensure this import matches your file structure
 
 const JobDetailsScreen = () => {
   const route = useRoute();
-  const navigation = useNavigation(); // Access navigation prop
-  const { jobId } = route.params || {}; // Extract jobId from params
+  const navigation = useNavigation();
+  const { jobId } = route.params || {};
 
   const [job, setJob] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -44,13 +43,13 @@ const JobDetailsScreen = () => {
 
   const handleApplyNow = () => {
     if (job) {
-      navigation.navigate('ApplyJobScreen', { jobId }); // Navigate to ApplyJobScreen with jobId
+      navigation.navigate('ApplyJobScreen', { jobId });
     }
   };
 
   if (loading) {
     return (
-      <View style={styles.container}>
+      <View style={styles.loadingContainer}>
         <Text style={styles.loadingText}>Loading...</Text>
       </View>
     );
@@ -58,7 +57,7 @@ const JobDetailsScreen = () => {
 
   if (error) {
     return (
-      <View style={styles.container}>
+      <View style={styles.errorContainer}>
         <Text style={styles.errorText}>{error}</Text>
       </View>
     );
@@ -66,7 +65,7 @@ const JobDetailsScreen = () => {
 
   if (!job) {
     return (
-      <View style={styles.container}>
+      <View style={styles.errorContainer}>
         <Text style={styles.errorText}>No job details available</Text>
       </View>
     );
@@ -75,7 +74,6 @@ const JobDetailsScreen = () => {
   return (
     <ScrollView style={styles.container}>
       <View style={styles.header}>
-        {/* Example image, you can replace it with a company logo or other relevant image */}
         <Image
           source={{ uri: 'https://via.placeholder.com/150' }} // Placeholder image URL
           style={styles.companyImage}
@@ -84,17 +82,25 @@ const JobDetailsScreen = () => {
         <Text style={styles.company}>{job.company}</Text>
       </View>
 
-      <View style={styles.detailsContainer}>
+      <View style={styles.section}>
         <Text style={styles.sectionTitle}>Job Details</Text>
-        <Text style={styles.location}>{job.location}, {job.province}</Text>
-        <Text style={styles.type}>Type: {job.type}</Text>
-        <Text style={styles.salary}>Salary: ${job.salary}</Text>
-        <Text style={styles.coordinates}>Coordinates: {job.latitude}, {job.longitude}</Text>
+        <Text style={styles.detailText}><Text style={styles.detailLabel}>Location:</Text> {job.location}, {job.province}</Text>
+        <Text style={styles.detailText}><Text style={styles.detailLabel}>Type:</Text> {job.type}</Text>
+        <Text style={styles.detailText}><Text style={styles.detailLabel}>Salary:</Text> ${job.salary}</Text>
+        <Text style={styles.detailText}><Text style={styles.detailLabel}>Description:</Text> {job.description}</Text>
       </View>
 
-      <View style={styles.buttonContainer}>
-        <Button title="Apply Now" onPress={handleApplyNow} color="#007bff" />
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>Company Details</Text>
+        <Text style={styles.detailText}><Text style={styles.detailLabel}>Website:</Text> {job.companyDetails?.website}</Text>
+        <Text style={styles.detailText}><Text style={styles.detailLabel}>Email:</Text> {job.companyDetails?.email}</Text>
+        <Text style={styles.detailText}><Text style={styles.detailLabel}>Phone:</Text> {job.companyDetails?.phone}</Text>
+        <Text style={styles.detailText}><Text style={styles.detailLabel}>Description:</Text> {job.companyDetails?.description}</Text>
       </View>
+
+      <TouchableOpacity style={styles.applyButton} onPress={handleApplyNow}>
+        <Text style={styles.applyButtonText}>Apply Now</Text>
+      </TouchableOpacity>
     </ScrollView>
   );
 };
@@ -102,76 +108,18 @@ const JobDetailsScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 16,
     backgroundColor: '#f5f5f5',
   },
-  header: {
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#fff',
+  },
+  errorContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
     padding: 16,
-    marginBottom: 16,
-    borderRadius: 8,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 4,
-  },
-  companyImage: {
-    width: 100,
-    height: 100,
-    borderRadius: 50,
-    marginBottom: 8,
-  },
-  title: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    color: '#333',
-    marginBottom: 8,
-  },
-  company: {
-    fontSize: 20,
-    color: '#666',
-    marginBottom: 16,
-  },
-  detailsContainer: {
-    backgroundColor: '#fff',
-    padding: 16,
-    borderRadius: 8,
-    marginBottom: 16,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 4,
-  },
-  sectionTitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: '#333',
-    marginBottom: 8,
-  },
-  location: {
-    fontSize: 16,
-    color: '#777',
-    marginBottom: 8,
-  },
-  type: {
-    fontSize: 16,
-    color: '#555',
-    marginBottom: 8,
-  },
-  salary: {
-    fontSize: 16,
-    color: '#555',
-    marginBottom: 8,
-  },
-  coordinates: {
-    fontSize: 16,
-    color: '#555',
-  },
-  buttonContainer: {
-    marginTop: 16,
   },
   loadingText: {
     fontSize: 18,
@@ -181,6 +129,71 @@ const styles = StyleSheet.create({
     fontSize: 18,
     color: 'red',
     textAlign: 'center',
+  },
+  header: {
+    alignItems: 'center',
+    backgroundColor: '#fff',
+    paddingVertical: 20,
+    marginBottom: 20,
+    borderBottomWidth: 1,
+    borderBottomColor: '#ddd',
+  },
+  companyImage: {
+    width: 100,
+    height: 100,
+    borderRadius: 50,
+    marginBottom: 16,
+  },
+  title: {
+    fontSize: 26,
+    fontWeight: 'bold',
+    color: '#333',
+    textAlign: 'center',
+    marginBottom: 8,
+  },
+  company: {
+    fontSize: 18,
+    color: '#666',
+    textAlign: 'center',
+  },
+  section: {
+    backgroundColor: '#fff',
+    padding: 20,
+    marginHorizontal: 16,
+    marginBottom: 20,
+    borderRadius: 8,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 4,
+  },
+  sectionTitle: {
+    fontSize: 22,
+    fontWeight: 'bold',
+    color: '#333',
+    marginBottom: 12,
+  },
+  detailText: {
+    fontSize: 16,
+    color: '#555',
+    marginBottom: 8,
+  },
+  detailLabel: {
+    fontWeight: '600',
+  },
+  applyButton: {
+    backgroundColor: '#007bff',
+    padding: 15,
+    borderRadius: 8,
+    marginHorizontal: 16,
+    marginBottom: 30,
+    alignItems: 'center',
+  },
+  applyButtonText: {
+    fontSize: 18,
+    color: '#fff',
+    fontWeight: 'bold',
   },
 });
 

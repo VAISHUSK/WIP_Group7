@@ -40,6 +40,7 @@ const BottomTabNavigator = ({ userType }) => {
           <Tab.Screen name="JobSearch" component={JobSearchScreen} />
           <Tab.Screen name="Notifications" component={NotificationsScreen} />
           <Tab.Screen name="Profile" component={ProfileScreen} />
+
         </>
       )}
       {userType === 'employer' && (

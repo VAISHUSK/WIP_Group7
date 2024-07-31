@@ -7,6 +7,7 @@ import MapView, { Marker } from 'react-native-maps';
 import Slider from '@react-native-community/slider';
 import { Picker } from '@react-native-picker/picker';
 import { useNavigation } from '@react-navigation/native';
+import * as Location from 'expo-location';
 
 const JobSearchScreen = () => {
   const [searchQuery, setSearchQuery] = useState('');
@@ -22,12 +23,7 @@ const JobSearchScreen = () => {
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const [mapRegion, setMapRegion] = useState({
-    latitude: 37.7749,
-    longitude: -122.4194,
-    latitudeDelta: 0.0922,
-    longitudeDelta: 0.0421,
-  });
+  const [mapRegion, setMapRegion] = useState(null);
   const [suggestions, setSuggestions] = useState([]);
 
   const navigation = useNavigation();
@@ -40,6 +36,24 @@ const JobSearchScreen = () => {
     fetchSuggestions();
   }, [searchQuery]);
 
+  useEffect(() => {
+    (async () => {
+      let { status } = await Location.requestForegroundPermissionsAsync();
+      if (status !== 'granted') {
+        setError('Permission to access location was denied');
+        return;
+      }
+  
+      let location = await Location.getCurrentPositionAsync({});
+      setMapRegion({
+        latitude: location.coords.latitude,
+        longitude: location.coords.longitude,
+        latitudeDelta: 0.0922,
+        longitudeDelta: 0.0421,
+      });
+    })();
+  }, []);
+  
   const fetchJobs = async () => {
     setLoading(true);
     setError('');
@@ -64,6 +78,8 @@ const JobSearchScreen = () => {
 
       if (jobsList.length === 0) {
         setError('No jobs found');
+      } else {
+        setError('');
       }
 
       setJobs(jobsList);
@@ -166,15 +182,18 @@ const JobSearchScreen = () => {
             data={jobs}
             renderItem={renderJob}
             keyExtractor={item => item.id}
+            ListEmptyComponent={<Text style={styles.errorText}>No jobs found</Text>}
           />
         ) : (
-          <MapView
-            style={styles.map}
-            region={mapRegion}
-            onRegionChangeComplete={region => setMapRegion(region)}
-          >
-            {renderMapMarkers()}
-          </MapView>
+          mapRegion && (
+            <MapView
+              style={styles.map}
+              region={mapRegion}
+              onRegionChangeComplete={region => setMapRegion(region)}
+            >
+              {renderMapMarkers()}
+            </MapView>
+          )
         )
       )}
       <Modal
@@ -224,19 +243,12 @@ const JobSearchScreen = () => {
               style={styles.picker}
             >
               <Picker.Item label="Any" value="Any" />
-              <Picker.Item label="Alberta" value="AB" />
-              <Picker.Item label="British Columbia" value="BC" />
-              <Picker.Item label="Manitoba" value="MB" />
-              <Picker.Item label="New Brunswick" value="NB" />
-              <Picker.Item label="Newfoundland and Labrador" value="NL" />
-              <Picker.Item label="Northwest Territories" value="NT" />
-              <Picker.Item label="Nova Scotia" value="NS" />
-              <Picker.Item label="Nunavut" value="NU" />
-              <Picker.Item label="Ontario" value="ON" />
-              <Picker.Item label="Prince Edward Island" value="PE" />
-              <Picker.Item label="Quebec" value="QC" />
-              <Picker.Item label="Saskatchewan" value="SK" />
-              <Picker.Item label="Yukon" value="YT" />
+              <Picker.Item label="ON" value="ON" />
+              <Picker.Item label="BC" value="BC" />
+              <Picker.Item label="AB" value="AB" />
+              <Picker.Item label="QC" value="QC" />
+              <Picker.Item label="NS" value="NS" />
+              {/* Add other provinces as needed */}
             </Picker>
             <Text style={styles.filterLabel}>Distance (km)</Text>
             <Slider
@@ -245,17 +257,23 @@ const JobSearchScreen = () => {
               maximumValue={100}
               step={1}
               value={filters.kmRange}
-              onValueChange={kmRange => setFilters({ ...filters, kmRange })}
+              onValueChange={value => setFilters({ ...filters, kmRange: value })}
             />
             <Text style={styles.sliderValue}>{filters.kmRange} km</Text>
             <TouchableOpacity
+              style={styles.applyButton}
               onPress={() => {
                 fetchJobs();
                 setModalVisible(false);
               }}
-              style={styles.applyButton}
             >
-              <Text style={styles.applyButtonText}>Apply Filters</Text>
+              <Text style={styles.applyButtonText}>Apply</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.closeButton}
+              onPress={() => setModalVisible(false)}
+            >
+              <Text style={styles.closeButtonText}>Close</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -267,92 +285,88 @@ const JobSearchScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    padding: 10,
     backgroundColor: '#f5f5f5',
   },
   searchContainer: {
     flexDirection: 'row',
-    padding: 10,
-    backgroundColor: '#fff',
     alignItems: 'center',
-    borderBottomWidth: 1,
-    borderBottomColor: '#ddd',
+    marginBottom: 10,
   },
   input: {
     flex: 1,
-    height: 40,
-    borderColor: '#ccc',
     borderWidth: 1,
-    borderRadius: 4,
-    paddingHorizontal: 10,
+    borderColor: '#ddd',
+    borderRadius: 5,
+    padding: 10,
   },
   searchButton: {
     backgroundColor: '#007bff',
     padding: 10,
-    borderRadius: 4,
+    borderRadius: 5,
     marginLeft: 10,
   },
   suggestionsContainer: {
+    position: 'absolute',
+    top: 60,
+    left: 10,
+    right: 10,
     backgroundColor: '#fff',
-    borderBottomWidth: 1,
-    borderBottomColor: '#ddd',
+    borderRadius: 5,
+    borderWidth: 1,
+    borderColor: '#ddd',
+    zIndex: 1,
   },
   suggestionText: {
     padding: 10,
-    fontSize: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: '#ddd',
   },
   filterContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    padding: 10,
-    backgroundColor: '#fff',
-    borderBottomWidth: 1,
-    borderBottomColor: '#ddd',
+    marginVertical: 10,
   },
   filterButton: {
-    padding: 10,
     backgroundColor: '#007bff',
-    borderRadius: 4,
+    padding: 10,
+    borderRadius: 5,
   },
   viewToggleButton: {
-    padding: 10,
     backgroundColor: '#007bff',
-    borderRadius: 4,
-  },
-  map: {
-    flex: 1,
-  },
-  jobContainer: {
-    backgroundColor: '#fff',
-    margin: 10,
-    borderRadius: 4,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 2,
-  },
-  jobDetails: {
     padding: 10,
-  },
-  jobTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-  },
-  jobCompany: {
-    fontSize: 16,
-    color: '#888',
-  },
-  jobLocation: {
-    fontSize: 14,
-    color: '#555',
+    borderRadius: 5,
   },
   loadingIndicator: {
     marginTop: 20,
   },
   errorText: {
     textAlign: 'center',
-    marginTop: 20,
     color: 'red',
+    marginTop: 20,
+  },
+  map: {
+    flex: 1,
+  },
+  jobContainer: {
+    padding: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: '#ddd',
+  },
+  jobDetails: {
+    marginVertical: 5,
+  },
+  jobTitle: {
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+  jobCompany: {
+    fontSize: 14,
+    color: '#555',
+  },
+  jobLocation: {
+    fontSize: 12,
+    color: '#888',
   },
   modalContainer: {
     flex: 1,
@@ -361,46 +375,51 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0,0,0,0.5)',
   },
   modalContent: {
-    width: '90%',
+    width: '80%',
     backgroundColor: '#fff',
-    borderRadius: 8,
+    borderRadius: 10,
     padding: 20,
-    alignItems: 'center',
   },
   modalTitle: {
-    fontSize: 20,
+    fontSize: 18,
     fontWeight: 'bold',
-    marginBottom: 20,
+    marginBottom: 10,
   },
   filterLabel: {
     fontSize: 16,
-    marginBottom: 10,
-    alignSelf: 'flex-start',
+    marginBottom: 5,
   },
   picker: {
-    width: '100%',
     height: 50,
-    marginBottom: 20,
+    width: '100%',
+    marginBottom: 10,
   },
   slider: {
     width: '100%',
-    height: 40,
     marginBottom: 10,
   },
   sliderValue: {
-    marginBottom: 20,
-    fontSize: 16,
+    textAlign: 'center',
+    marginBottom: 10,
   },
   applyButton: {
     backgroundColor: '#007bff',
     padding: 10,
-    borderRadius: 4,
-    width: '100%',
+    borderRadius: 5,
     alignItems: 'center',
+    marginVertical: 10,
   },
   applyButtonText: {
     color: '#fff',
-    fontSize: 16,
+    fontWeight: 'bold',
+  },
+  closeButton: {
+    alignItems: 'center',
+    marginTop: 10,
+  },
+  closeButtonText: {
+    color: '#007bff',
+    fontWeight: 'bold',
   },
 });
 

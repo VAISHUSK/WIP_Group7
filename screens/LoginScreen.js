@@ -59,6 +59,7 @@ const LoginScreen = () => {
       if (docSnap.exists()) {
         const userType = docSnap.data().userType;
 
+        console.warn(userType);
         if (userType === 'employee') {
           navigation.navigate('EmployeeTabNavigator');
         } else if (userType === 'employer') {
