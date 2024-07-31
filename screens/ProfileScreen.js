@@ -45,8 +45,9 @@ const ProfileScreen = ({ navigation }) => {
     return <ActivityIndicator size="large" color="#0000ff" style={{ flex: 1 }} />;
   }
 
+  // Use default parameters for destructuring userData
   const {
-    photoURL = require('../assets/default-avatar.png'),
+    photoURL = require('../assets/default-avatar.png'), // Default image path
     displayName = 'User Name',
     email = 'User Email',
     phoneNumber = 'Phone Number',
@@ -62,7 +63,7 @@ const ProfileScreen = ({ navigation }) => {
         <Avatar
           size="xlarge"
           rounded
-          source={{ uri: photoURL }}
+          source={typeof photoURL === 'string' ? { uri: photoURL } : photoURL} // Conditional source
           containerStyle={styles.avatar}
         />
         <Text style={styles.userName}>{displayName}</Text>

@@ -1,3 +1,4 @@
+// screens/CompanyDetailsScreen.js
 import React, { useState } from 'react';
 import { View, Text, TextInput, StyleSheet, Button } from 'react-native';
 import { addDoc, collection } from 'firebase/firestore';
@@ -27,14 +28,14 @@ const CompanyDetailsScreen = ({ route, navigation }) => {
         longitude: parseFloat(longitude),
         companyDetails,
       });
-      // Clear fields and navigate back to the home or job list
+      // Clear fields and navigate to Company Analysis screen
       setCompanyDetails({
         name: '',
         address: '',
         phone: '',
         website: '',
       });
-      navigation.navigate('Home'); // Navigate to home or job list screen
+      navigation.navigate('CompanyAnalysis'); // Navigate to Company Analysis screen
     } catch (error) {
       console.error('Error adding job:', error);
     }
@@ -42,7 +43,6 @@ const CompanyDetailsScreen = ({ route, navigation }) => {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.header}>Company Details</Text>
       <Text style={styles.label}>Company Name</Text>
       <TextInput
         style={styles.input}
@@ -81,11 +81,7 @@ const styles = StyleSheet.create({
   container: {
     padding: 16,
     backgroundColor: '#fff',
-  },
-  header: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    marginBottom: 16,
+    flex: 1, // Ensure it takes up the full height of the screen
   },
   label: {
     marginVertical: 8,

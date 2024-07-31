@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, FlatList, StyleSheet, TouchableOpacity, Modal } from 'react-native';
+import { View, Text, TextInput, FlatList, StyleSheet, TouchableOpacity, Modal, ActivityIndicator } from 'react-native';
 import { collection, query, where, getDocs } from 'firebase/firestore';
 import { db } from '../firebaseConfig';
 import { Ionicons } from '@expo/vector-icons';
@@ -28,12 +28,17 @@ const JobSearchScreen = () => {
     latitudeDelta: 0.0922,
     longitudeDelta: 0.0421,
   });
+  const [suggestions, setSuggestions] = useState([]);
 
   const navigation = useNavigation();
 
   useEffect(() => {
     fetchJobs();
   }, [filters]);
+
+  useEffect(() => {
+    fetchSuggestions();
+  }, [searchQuery]);
 
   const fetchJobs = async () => {
     setLoading(true);
@@ -42,7 +47,11 @@ const JobSearchScreen = () => {
       let q = collection(db, 'jobs');
 
       if (searchQuery) {
-        q = query(q, where('title', '==', searchQuery));
+        q = query(
+          q,
+          where('title', '>=', searchQuery),
+          where('title', '<=', searchQuery + '\uf8ff')
+        );
       }
 
       const querySnapshot = await getDocs(q);
@@ -53,12 +62,36 @@ const JobSearchScreen = () => {
       if (filters.location) jobsList = jobsList.filter(job => job.location.toLowerCase().includes(filters.location.toLowerCase()));
       if (filters.province && filters.province !== 'Any') jobsList = jobsList.filter(job => job.province === filters.province);
 
+      if (jobsList.length === 0) {
+        setError('No jobs found');
+      }
+
       setJobs(jobsList);
     } catch (error) {
       setError('Error fetching jobs');
       console.error('Error fetching jobs:', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchSuggestions = async () => {
+    if (searchQuery.length < 1) {
+      setSuggestions([]);
+      return;
+    }
+
+    try {
+      const q = query(
+        collection(db, 'jobs'),
+        where('title', '>=', searchQuery),
+        where('title', '<=', searchQuery + '\uf8ff')
+      );
+      const querySnapshot = await getDocs(q);
+      const suggestionsList = querySnapshot.docs.map(doc => doc.data().title);
+      setSuggestions(suggestionsList);
+    } catch (error) {
+      console.error('Error fetching suggestions:', error);
     }
   };
 
@@ -72,9 +105,6 @@ const JobSearchScreen = () => {
         <Text style={styles.jobCompany}>{item.company}</Text>
         <Text style={styles.jobLocation}>{item.location}, {item.province}</Text>
       </View>
-      <TouchableOpacity style={styles.applyButton}>
-        <Text style={styles.applyText}>Apply</Text>
-      </TouchableOpacity>
     </TouchableOpacity>
   );
 
@@ -94,22 +124,41 @@ const JobSearchScreen = () => {
           style={styles.input}
           placeholder="Search Jobs"
           value={searchQuery}
-          onChangeText={setSearchQuery}
+          onChangeText={(text) => {
+            setSearchQuery(text);
+            fetchSuggestions();
+          }}
         />
         <TouchableOpacity style={styles.searchButton} onPress={fetchJobs}>
-          <Ionicons name="search" size={24} color="white" />
+          <Ionicons name="search" size={24} color="#fff" />
         </TouchableOpacity>
       </View>
+      {suggestions.length > 0 && (
+        <View style={styles.suggestionsContainer}>
+          {suggestions.map((suggestion, index) => (
+            <TouchableOpacity
+              key={index}
+              onPress={() => {
+                setSearchQuery(suggestion);
+                fetchJobs();
+              }}
+            >
+              <Text style={styles.suggestionText}>{suggestion}</Text>
+            </TouchableOpacity>
+          ))}
+        </View>
+      )}
       <View style={styles.filterContainer}>
         <TouchableOpacity onPress={() => setModalVisible(true)} style={styles.filterButton}>
-          <Ionicons name="options" size={24} color="white" />
+          <Ionicons name="options" size={24} color="#fff" />
         </TouchableOpacity>
         <TouchableOpacity onPress={() => setIsListView(!isListView)} style={styles.viewToggleButton}>
-          <Ionicons name={isListView ? "map" : "list"} size={24} color="white" />
+          <Ionicons name={isListView ? "map" : "list"} size={24} color="#fff" />
         </TouchableOpacity>
       </View>
-      {loading && <Text style={styles.loadingText}>Loading...</Text>}
-      {error ? (
+      {loading ? (
+        <ActivityIndicator size="large" color="#007bff" style={styles.loadingIndicator} />
+      ) : error ? (
         <Text style={styles.errorText}>{error}</Text>
       ) : (
         isListView ? (
@@ -144,9 +193,10 @@ const JobSearchScreen = () => {
               style={styles.picker}
             >
               <Picker.Item label="Any" value="Any" />
+              <Picker.Item label="Full-Time" value="Full-Time" />
               <Picker.Item label="Part-Time" value="Part-Time" />
-              <Picker.Item label="Contract" value="Contract" />
               <Picker.Item label="Internship" value="Internship" />
+              <Picker.Item label="Contract" value="Contract" />
             </Picker>
             <Text style={styles.filterLabel}>Salary</Text>
             <Picker
@@ -197,15 +247,15 @@ const JobSearchScreen = () => {
               value={filters.kmRange}
               onValueChange={kmRange => setFilters({ ...filters, kmRange })}
             />
-            <Text>Distance: {filters.kmRange} km</Text>
+            <Text style={styles.sliderValue}>{filters.kmRange} km</Text>
             <TouchableOpacity
-              style={styles.applyFilterButton}
               onPress={() => {
                 fetchJobs();
                 setModalVisible(false);
               }}
+              style={styles.applyButton}
             >
-              <Text style={styles.applyFilterButtonText}>Apply Filters</Text>
+              <Text style={styles.applyButtonText}>Apply Filters</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -217,127 +267,140 @@ const JobSearchScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 16,
-    backgroundColor: '#fff',
+    backgroundColor: '#f5f5f5',
   },
   searchContainer: {
     flexDirection: 'row',
+    padding: 10,
+    backgroundColor: '#fff',
     alignItems: 'center',
-    marginBottom: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: '#ddd',
   },
   input: {
     flex: 1,
     height: 40,
-    borderColor: '#ddd',
+    borderColor: '#ccc',
     borderWidth: 1,
     borderRadius: 4,
-    paddingHorizontal: 8,
+    paddingHorizontal: 10,
   },
   searchButton: {
-    backgroundColor: 'dodgerblue',
+    backgroundColor: '#007bff',
     padding: 10,
     borderRadius: 4,
     marginLeft: 10,
   },
+  suggestionsContainer: {
+    backgroundColor: '#fff',
+    borderBottomWidth: 1,
+    borderBottomColor: '#ddd',
+  },
+  suggestionText: {
+    padding: 10,
+    fontSize: 16,
+  },
   filterContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginBottom: 16,
+    padding: 10,
+    backgroundColor: '#fff',
+    borderBottomWidth: 1,
+    borderBottomColor: '#ddd',
   },
   filterButton: {
-    backgroundColor: 'dodgerblue',
     padding: 10,
+    backgroundColor: '#007bff',
     borderRadius: 4,
   },
   viewToggleButton: {
-    backgroundColor: 'dodgerblue',
     padding: 10,
+    backgroundColor: '#007bff',
     borderRadius: 4,
-  },
-  loadingText: {
-    textAlign: 'center',
-    fontSize: 16,
-  },
-  errorText: {
-    textAlign: 'center',
-    fontSize: 16,
-    color: 'red',
-  },
-  jobContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    padding: 16,
-    borderBottomColor: '#ddd',
-    borderBottomWidth: 1,
-  },
-  jobDetails: {
-    flex: 1,
-  },
-  jobTitle: {
-    fontSize: 16,
-    fontWeight: 'bold',
-  },
-  jobCompany: {
-    fontSize: 14,
-    color: '#555',
-  },
-  jobLocation: {
-    fontSize: 14,
-    color: '#777',
-  },
-  applyButton: {
-    backgroundColor: 'dodgerblue',
-    padding: 10,
-    borderRadius: 4,
-  },
-  applyText: {
-    color: 'white',
-    fontWeight: 'bold',
   },
   map: {
     flex: 1,
-    width: '100%',
+  },
+  jobContainer: {
+    backgroundColor: '#fff',
+    margin: 10,
+    borderRadius: 4,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 2,
+  },
+  jobDetails: {
+    padding: 10,
+  },
+  jobTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+  },
+  jobCompany: {
+    fontSize: 16,
+    color: '#888',
+  },
+  jobLocation: {
+    fontSize: 14,
+    color: '#555',
+  },
+  loadingIndicator: {
+    marginTop: 20,
+  },
+  errorText: {
+    textAlign: 'center',
+    marginTop: 20,
+    color: 'red',
   },
   modalContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    backgroundColor: 'rgba(0,0,0,0.5)',
   },
   modalContent: {
-    width: '80%',
+    width: '90%',
+    backgroundColor: '#fff',
+    borderRadius: 8,
     padding: 20,
-    backgroundColor: 'white',
-    borderRadius: 10,
+    alignItems: 'center',
   },
   modalTitle: {
-    fontSize: 18,
+    fontSize: 20,
     fontWeight: 'bold',
-    marginBottom: 10,
+    marginBottom: 20,
   },
   filterLabel: {
     fontSize: 16,
-    marginVertical: 10,
+    marginBottom: 10,
+    alignSelf: 'flex-start',
   },
   picker: {
-    height: 50,
     width: '100%',
+    height: 50,
+    marginBottom: 20,
   },
   slider: {
     width: '100%',
     height: 40,
-    marginVertical: 10,
+    marginBottom: 10,
   },
-  applyFilterButton: {
-    backgroundColor: 'dodgerblue',
+  sliderValue: {
+    marginBottom: 20,
+    fontSize: 16,
+  },
+  applyButton: {
+    backgroundColor: '#007bff',
     padding: 10,
     borderRadius: 4,
-    marginTop: 20,
+    width: '100%',
+    alignItems: 'center',
   },
-  applyFilterButtonText: {
-    color: 'white',
-    textAlign: 'center',
-    fontWeight: 'bold',
+  applyButtonText: {
+    color: '#fff',
+    fontSize: 16,
   },
 });
 

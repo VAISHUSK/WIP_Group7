@@ -5,7 +5,7 @@ import Geocoder from 'react-native-geocoding';
 import { Picker } from '@react-native-picker/picker';
 
 // Initialize Geocoder with your Google API Key
-Geocoder.init('AIzaSyDi08rJ4cV1T-rTcvmWv5Nk_0o6AYfOyGw'); // Replace with your API Key
+Geocoder.init('AIzaSyDi08rJ4cV1T-rTcvmWv5Nk_0o6AYfOyGw'); 
 
 const provinces = [
   { label: 'Any', value: 'Any' },

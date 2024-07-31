@@ -1,15 +1,17 @@
-// ApplyJobScreen.js
 import React, { useState } from 'react';
-import { View, Text, TextInput, StyleSheet, Button, ScrollView, Image, Platform } from 'react-native';
+import { View, Text, TextInput, StyleSheet, Button, ScrollView, Image } from 'react-native';
 import { launchImageLibrary } from 'react-native-image-picker'; // For image selection
+import { addDoc, collection } from 'firebase/firestore';
+import { db } from '../firebaseConfig'; // Ensure this import matches your file structure
 
-const ApplyJobScreen = () => {
+const ApplyJobScreen = ({ route, navigation }) => {
+  const { jobId } = route.params || {}; // Extract jobId from params
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [resume, setResume] = useState('');
   const [coverLetter, setCoverLetter] = useState('');
   const [selectedResume, setSelectedResume] = useState(null);
-  const [imageUri, setImageUri] = useState('');
+  const [applying, setApplying] = useState(false);
 
   const handleResumeUpload = async () => {
     const result = await launchImageLibrary({ mediaType: 'photo', quality: 1 });
@@ -19,9 +21,31 @@ const ApplyJobScreen = () => {
     }
   };
 
-  const handleSubmit = () => {
-    // Implement your submission logic here
-    console.log('Application Submitted:', { name, email, resume, coverLetter });
+  const handleSubmit = async () => {
+    if (!name || !email) {
+      alert('Please fill out all required fields.');
+      return;
+    }
+
+    setApplying(true);
+    try {
+      await addDoc(collection(db, 'applications'), {
+        jobId,
+        applicantName: name,
+        applicantEmail: email,
+        resume: resume || null, // Allow for resume to be optional
+        coverLetter,
+        timestamp: new Date(),
+      });
+
+      alert('Application submitted successfully!');
+      navigation.goBack(); // Navigate back to previous screen after submission
+    } catch (err) {
+      console.error('Error submitting application:', err);
+      alert('Error submitting application. Please try again.');
+    } finally {
+      setApplying(false);
+    }
   };
 
   return (
@@ -52,7 +76,7 @@ const ApplyJobScreen = () => {
           onChangeText={setEmail}
         />
 
-        <Text style={styles.label}>Resume (PDF or DOC)</Text>
+        <Text style={styles.label}>Resume (Optional, PDF or DOC)</Text>
         <View style={styles.resumeContainer}>
           <Button title="Upload Resume" onPress={handleResumeUpload} />
           {selectedResume && (
@@ -70,7 +94,12 @@ const ApplyJobScreen = () => {
           onChangeText={setCoverLetter}
         />
 
-        <Button title="Submit Application" onPress={handleSubmit} color="#007bff" />
+        <Button
+          title={applying ? 'Submitting...' : 'Submit Application'}
+          onPress={handleSubmit}
+          color="#007bff"
+          disabled={applying}
+        />
       </View>
     </ScrollView>
   );

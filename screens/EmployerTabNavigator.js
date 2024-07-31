@@ -3,7 +3,7 @@ import React from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Ionicons } from '@expo/vector-icons';
 
-import AdminPanelScreen from './AdminPanelScreen';
+import CompanyAnalysisScreen from './CompanyAnalysisScreen'; // Import CompanyAnalysisScreen
 import AddJobScreen from './AddJobScreen';
 import ProfileScreen from './ProfileScreen';
 
@@ -16,8 +16,8 @@ const EmployerTabNavigator = () => {
         tabBarIcon: ({ focused, color, size }) => {
           let iconName;
 
-          if (route.name === 'AdminPanel') {
-            iconName = focused ? 'settings' : 'settings-outline';
+          if (route.name === 'CompanyAnalysis') {
+            iconName = focused ? 'analytics' : 'analytics-outline'; // Assuming 'analytics' is the icon name
           } else if (route.name === 'AddJob') {
             iconName = focused ? 'add-circle' : 'add-circle-outline';
           } else if (route.name === 'Profile') {
@@ -32,7 +32,7 @@ const EmployerTabNavigator = () => {
         inactiveTintColor: 'gray',
       }}
     >
-      <Tab.Screen name="AdminPanel" component={AdminPanelScreen} />
+      <Tab.Screen name="CompanyAnalysis" component={CompanyAnalysisScreen} />
       <Tab.Screen name="AddJob" component={AddJobScreen} />
       <Tab.Screen name="Profile" component={ProfileScreen} />
     </Tab.Navigator>

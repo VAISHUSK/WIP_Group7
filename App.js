@@ -11,6 +11,7 @@ import JobDetailsScreen from './screens/JobDetailsScreen'; // Import JobDetailsS
 import ApplyJobScreen from './screens/ApplyJobScreen'; // Import ApplyJobScreen
 import AddJobScreen from './screens/AddJobScreen'; // Import AddJobScreen
 import CompanyDetailsScreen from './screens/CompanyDetailsScreen'; // Import CompanyDetailsScreen
+import CompanyAnalysisScreen from './screens/CompanyAnalysisScreen'; // Import CompanyAnalysisScreen
 import ProfileScreen from './screens/ProfileScreen'; // Import ProfileScreen
 import EditProfileScreen from './screens/EditProfileScreen'; // Import EditProfileScreen
 import { ActivityIndicator, View } from 'react-native'; // Import ActivityIndicator for loading state
@@ -65,6 +66,11 @@ const App = () => {
               options={{ title: 'Company Details' }}
             />
             <Stack.Screen
+              name="CompanyAnalysis"
+              component={CompanyAnalysisScreen}
+              options={{ title: 'Company Analysis' }}
+            />
+            <Stack.Screen
               name="Profile"
               component={ProfileScreen}
               options={{ title: 'Profile' }}
@@ -101,6 +107,11 @@ const App = () => {
               name="CompanyDetails"
               component={CompanyDetailsScreen}
               options={{ title: 'Company Details' }}
+            />
+            <Stack.Screen
+              name="CompanyAnalysis"
+              component={CompanyAnalysisScreen}
+              options={{ title: 'Company Analysis' }}
             />
             <Stack.Screen
               name="Profile"
