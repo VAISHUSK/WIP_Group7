@@ -3,7 +3,6 @@ import { View, Text, TextInput, StyleSheet, Button, FlatList, KeyboardAvoidingVi
 import { GooglePlacesAutocomplete } from 'react-native-google-places-autocomplete';
 import Geocoder from 'react-native-geocoding';
 import { Picker } from '@react-native-picker/picker';
-
 // Initialize Geocoder with your Google API Key
 Geocoder.init('AIzaSyDi08rJ4cV1T-rTcvmWv5Nk_0o6AYfOyGw'); 
 
