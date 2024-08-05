@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, FlatList, StyleSheet, TouchableOpacity, Modal, ActivityIndicator } from 'react-native';
+import { View, Text, TextInput, FlatList, StyleSheet, TouchableOpacity, Modal, ActivityIndicator, Pressable } from 'react-native';
 import { collection, query, where, getDocs } from 'firebase/firestore';
 import { db } from '../firebaseConfig';
 import { Ionicons } from '@expo/vector-icons';
@@ -16,7 +16,8 @@ const JobSearchScreen = () => {
   const [modalVisible, setModalVisible] = useState(false);
   const [filters, setFilters] = useState({
     jobType: 'Any',
-    salary: 'Any',
+    salaryMin: 0,
+    salaryMax: 100000,
     location: '',
     province: 'Any',
     kmRange: 10,
@@ -43,7 +44,7 @@ const JobSearchScreen = () => {
         setError('Permission to access location was denied');
         return;
       }
-  
+
       let location = await Location.getCurrentPositionAsync({});
       setMapRegion({
         latitude: location.coords.latitude,
@@ -53,7 +54,7 @@ const JobSearchScreen = () => {
       });
     })();
   }, []);
-  
+
   const fetchJobs = async () => {
     setLoading(true);
     setError('');
@@ -72,8 +73,7 @@ const JobSearchScreen = () => {
       let jobsList = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
 
       if (filters.jobType && filters.jobType !== 'Any') jobsList = jobsList.filter(job => job.type === filters.jobType);
-      if (filters.salary && filters.salary !== 'Any') jobsList = jobsList.filter(job => job.salary === filters.salary);
-      if (filters.location) jobsList = jobsList.filter(job => job.location.toLowerCase().includes(filters.location.toLowerCase()));
+      if (filters.salaryMin || filters.salaryMax) jobsList = jobsList.filter(job => job.salary >= filters.salaryMin && job.salary <= filters.salaryMax);
       if (filters.province && filters.province !== 'Any') jobsList = jobsList.filter(job => job.province === filters.province);
 
       if (jobsList.length === 0) {
@@ -202,81 +202,90 @@ const JobSearchScreen = () => {
         transparent={true}
         onRequestClose={() => setModalVisible(false)}
       >
-        <View style={styles.modalContainer}>
-          <View style={styles.modalContent}>
-            <Text style={styles.modalTitle}>Filters</Text>
-            <Text style={styles.filterLabel}>Job Type</Text>
-            <Picker
-              selectedValue={filters.jobType}
-              onValueChange={jobType => setFilters({ ...filters, jobType })}
-              style={styles.picker}
-            >
-              <Picker.Item label="Any" value="Any" />
-              <Picker.Item label="Full-Time" value="Full-Time" />
-              <Picker.Item label="Part-Time" value="Part-Time" />
-              <Picker.Item label="Internship" value="Internship" />
-              <Picker.Item label="Contract" value="Contract" />
-            </Picker>
-            <Text style={styles.filterLabel}>Salary</Text>
-            <Picker
-              selectedValue={filters.salary}
-              onValueChange={salary => setFilters({ ...filters, salary })}
-              style={styles.picker}
-            >
-              <Picker.Item label="Any" value="Any" />
-              <Picker.Item label="$30,000" value="30000" />
-              <Picker.Item label="$50,000" value="50000" />
-              <Picker.Item label="$70,000" value="70000" />
-              <Picker.Item label="$90,000" value="90000" />
-            </Picker>
-            <Text style={styles.filterLabel}>Location</Text>
-            <TextInput
-              style={styles.input}
-              placeholder="City or Address"
-              value={filters.location}
-              onChangeText={location => setFilters({ ...filters, location })}
-            />
-            <Text style={styles.filterLabel}>Province</Text>
-            <Picker
-              selectedValue={filters.province}
-              onValueChange={province => setFilters({ ...filters, province })}
-              style={styles.picker}
-            >
-              <Picker.Item label="Any" value="Any" />
-              <Picker.Item label="ON" value="ON" />
-              <Picker.Item label="BC" value="BC" />
-              <Picker.Item label="AB" value="AB" />
-              <Picker.Item label="QC" value="QC" />
-              <Picker.Item label="NS" value="NS" />
-              {/* Add other provinces as needed */}
-            </Picker>
-            <Text style={styles.filterLabel}>Distance (km)</Text>
-            <Slider
-              style={styles.slider}
-              minimumValue={1}
-              maximumValue={100}
-              step={1}
-              value={filters.kmRange}
-              onValueChange={value => setFilters({ ...filters, kmRange: value })}
-            />
-            <Text style={styles.sliderValue}>{filters.kmRange} km</Text>
-            <TouchableOpacity
-              style={styles.applyButton}
-              onPress={() => {
-                fetchJobs();
+        <Pressable style={styles.modalOverlay} onPress={() => setModalVisible(false)}>
+          <View style={styles.modalContainer}>
+            <View style={styles.modalContent}>
+              <TouchableOpacity style={styles.closeButton} onPress={() => setModalVisible(false)}>
+                <Ionicons name="close" size={24} color="#000" />
+              </TouchableOpacity>
+              <Text style={styles.modalTitle}>Filters</Text>
+              <Text style={styles.filterLabel}>Job Type</Text>
+              <Picker
+                selectedValue={filters.jobType}
+                onValueChange={jobType => setFilters({ ...filters, jobType })}
+                style={styles.picker}
+              >
+                <Picker.Item label="Any" value="Any" />
+                <Picker.Item label="Full-Time" value="Full-Time" />
+                <Picker.Item label="Part-Time" value="Part-Time" />
+                <Picker.Item label="Internship" value="Internship" />
+                <Picker.Item label="Contract" value="Contract" />
+              </Picker>
+              <Text style={styles.filterLabel}>Salary Range</Text>
+              <View style={styles.salaryRangeContainer}>
+                <Text style={styles.filterLabel}>Min</Text>
+                <TextInput
+                  style={styles.salaryInput}
+                  keyboardType="numeric"
+                  value={filters.salaryMin.toString()}
+                  onChangeText={text => setFilters({ ...filters, salaryMin: parseInt(text) })}
+                />
+                <Text style={styles.filterLabel}>Max</Text>
+                <TextInput
+                  style={styles.salaryInput}
+                  keyboardType="numeric"
+                  value={filters.salaryMax.toString()}
+                  onChangeText={text => setFilters({ ...filters, salaryMax: parseInt(text) })}
+                />
+              </View>
+              <Text style={styles.filterLabel}>Location</Text>
+              <Picker
+                selectedValue={filters.location}
+                onValueChange={location => setFilters({ ...filters, location })}
+                style={styles.picker}
+              >
+                {/* Populate with a list of cities from Canada */}
+                <Picker.Item label="Toronto" value="Toronto" />
+                <Picker.Item label="Vancouver" value="Vancouver" />
+                <Picker.Item label="Montreal" value="Montreal" />
+                <Picker.Item label="Calgary" value="Calgary" />
+                <Picker.Item label="Edmonton" value="Edmonton" />
+                {/* Add more cities as needed */}
+              </Picker>
+              <Text style={styles.filterLabel}>Province</Text>
+              <Picker
+                selectedValue={filters.province}
+                onValueChange={province => setFilters({ ...filters, province })}
+                style={styles.picker}
+              >
+                <Picker.Item label="Any" value="Any" />
+                <Picker.Item label="ON" value="ON" />
+                <Picker.Item label="QC" value="QC" />
+                <Picker.Item label="BC" value="BC" />
+                <Picker.Item label="AB" value="AB" />
+                {/* Add more provinces as needed */}
+              </Picker>
+              <Text style={styles.filterLabel}>Distance (km)</Text>
+              <Slider
+                style={styles.slider}
+                minimumValue={0}
+                maximumValue={50}
+                step={1}
+                value={filters.kmRange}
+                onValueChange={value => setFilters({ ...filters, kmRange: value })}
+                minimumTrackTintColor="#007bff"
+                maximumTrackTintColor="#000000"
+              />
+              <Text style={styles.filterLabel}>{filters.kmRange} km</Text>
+              <TouchableOpacity style={styles.applyButton} onPress={() => {
                 setModalVisible(false);
-              }}
-            >
-              <Text style={styles.applyButtonText}>Apply</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={styles.closeButton}
-              onPress={() => setModalVisible(false)}
-            >
-              <Text style={styles.closeButtonText}>Close</Text>
-            </TouchableOpacity>
+                fetchJobs();
+              }}>
+                <Text style={styles.applyButtonText}>Apply Filters</Text>
+              </TouchableOpacity>
+            </View>
           </View>
-        </View>
+        </Pressable>
       </Modal>
     </View>
   );
@@ -285,141 +294,145 @@ const JobSearchScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 10,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: '#fff',
   },
   searchContainer: {
     flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 10,
+    padding: 10,
   },
   input: {
     flex: 1,
     borderWidth: 1,
     borderColor: '#ddd',
-    borderRadius: 5,
-    padding: 10,
+    borderRadius: 4,
+    padding: 8,
   },
   searchButton: {
     backgroundColor: '#007bff',
+    justifyContent: 'center',
+    alignItems: 'center',
     padding: 10,
-    borderRadius: 5,
-    marginLeft: 10,
+    borderRadius: 4,
+    marginLeft: 8,
   },
   suggestionsContainer: {
-    position: 'absolute',
-    top: 60,
-    left: 10,
-    right: 10,
-    backgroundColor: '#fff',
-    borderRadius: 5,
-    borderWidth: 1,
-    borderColor: '#ddd',
-    zIndex: 1,
+    paddingHorizontal: 10,
+    paddingVertical: 5,
   },
   suggestionText: {
-    padding: 10,
-    borderBottomWidth: 1,
-    borderBottomColor: '#ddd',
+    padding: 5,
+    fontSize: 16,
   },
   filterContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginVertical: 10,
+    padding: 10,
   },
   filterButton: {
     backgroundColor: '#007bff',
+    justifyContent: 'center',
+    alignItems: 'center',
     padding: 10,
-    borderRadius: 5,
+    borderRadius: 4,
   },
   viewToggleButton: {
     backgroundColor: '#007bff',
+    justifyContent: 'center',
+    alignItems: 'center',
     padding: 10,
-    borderRadius: 5,
+    borderRadius: 4,
+  },
+  map: {
+    flex: 1,
+  },
+  jobContainer: {
+    padding: 15,
+    borderBottomWidth: 1,
+    borderBottomColor: '#ddd',
+  },
+  jobDetails: {
+    flexDirection: 'column',
+  },
+  jobTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+  },
+  jobCompany: {
+    fontSize: 16,
+    color: '#555',
+  },
+  jobLocation: {
+    fontSize: 14,
+    color: '#888',
   },
   loadingIndicator: {
     marginTop: 20,
   },
   errorText: {
     textAlign: 'center',
-    color: 'red',
     marginTop: 20,
+    color: 'red',
   },
-  map: {
-    flex: 1,
-  },
-  jobContainer: {
-    padding: 10,
-    borderBottomWidth: 1,
-    borderBottomColor: '#ddd',
-  },
-  jobDetails: {
-    marginVertical: 5,
-  },
-  jobTitle: {
-    fontSize: 16,
-    fontWeight: 'bold',
-  },
-  jobCompany: {
-    fontSize: 14,
-    color: '#555',
-  },
-  jobLocation: {
-    fontSize: 12,
-    color: '#888',
-  },
-  modalContainer: {
+  modalOverlay: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: 'rgba(0,0,0,0.5)',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+  },
+  modalContainer: {
+    backgroundColor: '#fff',
+    padding: 20,
+    borderRadius: 10,
+    width: '90%',
+    maxWidth: 500,
   },
   modalContent: {
-    width: '80%',
-    backgroundColor: '#fff',
-    borderRadius: 10,
-    padding: 20,
+    alignItems: 'center',
+  },
+  closeButton: {
+    alignSelf: 'flex-end',
   },
   modalTitle: {
-    fontSize: 18,
+    fontSize: 20,
     fontWeight: 'bold',
     marginBottom: 10,
   },
   filterLabel: {
     fontSize: 16,
+    fontWeight: 'bold',
     marginBottom: 5,
   },
   picker: {
-    height: 50,
     width: '100%',
+    height: 50,
+  },
+  salaryRangeContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
     marginBottom: 10,
+  },
+  salaryInput: {
+    borderWidth: 1,
+    borderColor: '#ddd',
+    borderRadius: 4,
+    padding: 8,
+    width: '45%',
   },
   slider: {
     width: '100%',
-    marginBottom: 10,
-  },
-  sliderValue: {
-    textAlign: 'center',
+    height: 40,
     marginBottom: 10,
   },
   applyButton: {
     backgroundColor: '#007bff',
     padding: 10,
-    borderRadius: 5,
-    alignItems: 'center',
-    marginVertical: 10,
+    borderRadius: 4,
+    marginTop: 10,
   },
   applyButtonText: {
     color: '#fff',
-    fontWeight: 'bold',
-  },
-  closeButton: {
-    alignItems: 'center',
-    marginTop: 10,
-  },
-  closeButtonText: {
-    color: '#007bff',
-    fontWeight: 'bold',
+    fontSize: 16,
   },
 });
 
