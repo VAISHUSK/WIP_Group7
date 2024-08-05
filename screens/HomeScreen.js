@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, Dimensions } from 'react-native';
 import { PieChart, BarChart, LineChart } from 'react-native-chart-kit';
-import { collection, query, where, getDocs } from 'firebase/firestore';
+import { collection, query, where, onSnapshot } from 'firebase/firestore';
 import { db } from '../firebaseConfig';
 import { useUser } from '../UserContext';
 
@@ -13,17 +13,16 @@ const HomeScreen = () => {
 
   useEffect(() => {
     if (user) {
-      fetchData();
+      const unsubscribe = fetchData();
+      return () => unsubscribe(); // Cleanup subscription on unmount
     }
   }, [user]);
 
-  const fetchData = async () => {
-    try {
-      // Fetch application data filtered by the applicant's email address
-      const applicationsRef = collection(db, 'applications');
-      const q = query(applicationsRef, where('applicantEmail', '==', user.email));
-      const querySnapshot = await getDocs(q);
+  const fetchData = () => {
+    const applicationsRef = collection(db, 'applications');
+    const q = query(applicationsRef, where('applicantEmail', '==', user.email));
 
+    const unsubscribe = onSnapshot(q, (querySnapshot) => {
       const statusCount = {
         Applied: 0,
         Interview: 0,
@@ -79,9 +78,11 @@ const HomeScreen = () => {
           },
         ],
       });
-    } catch (error) {
+    }, (error) => {
       console.error('Error fetching application data:', error);
-    }
+    });
+
+    return unsubscribe;
   };
 
   const getColor = (status) => {

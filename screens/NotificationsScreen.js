@@ -1,14 +1,66 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, FlatList, StyleSheet, TouchableOpacity } from 'react-native';
-import { ListItem, Text, Icon } from 'react-native-elements';
+import { Text, Icon } from 'react-native-elements';
+import { db } from '../firebaseConfig';
+import { collection, query, orderBy, onSnapshot, addDoc } from 'firebase/firestore';
 
 const NotificationsScreen = () => {
-  const [notifications, setNotifications] = useState([
-    { id: '1', title: 'New Job Opportunity', message: 'A new job is available. Apply now!' },
-    { id: '2', title: 'Application Status', message: 'Your application has been reviewed.' },
-    { id: '3', title: 'Interview Scheduled', message: 'You have an interview on Monday.' },
-    { id: '4', title: 'Congratulations!', message: 'You got the job!' },
-  ]);
+  const [notifications, setNotifications] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchNotifications = async () => {
+      try {
+        const q = query(collection(db, 'notifications'), orderBy('timestamp', 'desc'));
+        const unsubscribe = onSnapshot(q, (querySnapshot) => {
+          const notificationsData = querySnapshot.docs.map(doc => ({
+            id: doc.id,
+            ...doc.data(),
+          }));
+          setNotifications(notificationsData);
+          setLoading(false);
+        });
+
+        return unsubscribe;
+      } catch (error) {
+        console.error("Error fetching notifications: ", error);
+        setLoading(false);
+      }
+    };
+
+    fetchNotifications();
+  }, []);
+
+  useEffect(() => {
+    const listenForStatusChanges = () => {
+      const applicationsQuery = query(collection(db, 'applications'));
+      const unsubscribe = onSnapshot(applicationsQuery, (snapshot) => {
+        snapshot.docChanges().forEach((change) => {
+          if (change.type === 'modified') {
+            const { applicantEmail, status } = change.doc.data();
+            const notification = {
+              title: `Status Updated for ${applicantEmail}`,
+              message: `Your application status is now: ${status}`,
+              timestamp: new Date(),
+            };
+            addNotification(notification);
+          }
+        });
+      });
+
+      return unsubscribe;
+    };
+
+    listenForStatusChanges();
+  }, []);
+
+  const addNotification = async (notification) => {
+    try {
+      await addDoc(collection(db, 'notifications'), notification);
+    } catch (error) {
+      console.error('Error adding notification: ', error);
+    }
+  };
 
   const renderNotification = ({ item }) => (
     <TouchableOpacity activeOpacity={0.8} style={styles.notificationItem}>
@@ -22,12 +74,16 @@ const NotificationsScreen = () => {
 
   return (
     <View style={styles.container}>
-      <FlatList
-        data={notifications}
-        renderItem={renderNotification}
-        keyExtractor={(item) => item.id}
-        ListEmptyComponent={<Text style={styles.emptyText}>No notifications found.</Text>}
-      />
+      {loading ? (
+        <Text style={styles.loadingText}>Loading...</Text>
+      ) : (
+        <FlatList
+          data={notifications}
+          renderItem={renderNotification}
+          keyExtractor={(item) => item.id}
+          ListEmptyComponent={<Text style={styles.emptyText}>No notifications found.</Text>}
+        />
+      )}
     </View>
   );
 };
@@ -65,6 +121,12 @@ const styles = StyleSheet.create({
     color: '#666',
   },
   emptyText: {
+    textAlign: 'center',
+    fontSize: 16,
+    color: '#666',
+    marginTop: 20,
+  },
+  loadingText: {
     textAlign: 'center',
     fontSize: 16,
     color: '#666',
