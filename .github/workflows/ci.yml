@@ -27,12 +27,17 @@ jobs:
 
     - name: Run lint
       run: |
-        npm run android  # Ensure this script is defined in your package.json
+        npm run lint  # Ensure this script is defined in your package.json
 
     - name: Run tests
       run: |
         npm test  # Ensure this script is defined in your package.json
 
-    - name: Build app (Expo)
+    - name: Start Metro Bundler
       run: |
-        npx expo build:web  # Optional, if you want to build a web version
+        npm start &
+        sleep 10  # Allow some time for Metro to start
+
+    - name: Run Android build
+      run: |
+        npm run android
