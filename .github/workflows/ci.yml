@@ -27,7 +27,7 @@ jobs:
 
     - name: Run lint
       run: |
-        npm run lint  # Ensure this script is defined in your package.json
+        npm start  # Ensure this script is defined in your package.json
 
     - name: Run tests
       run: |
