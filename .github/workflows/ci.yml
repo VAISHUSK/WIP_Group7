@@ -27,7 +27,7 @@ jobs:
 
     - name: Run lint
       run: |
-        npm start  # Ensure this script is defined in your package.json
+        npm run android  # Ensure this script is defined in your package.json
 
     - name: Run tests
       run: |
