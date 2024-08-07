@@ -6,6 +6,7 @@ import CompanyAnalysisScreen from './CompanyAnalysisScreen'; // Import CompanyAn
 import AddJobScreen from './AddJobScreen';
 import ProfileScreen from './ProfileScreen';
 import ViewApplicationsScreen from './ViewApplicationsScreen'; // Import ViewApplicationsScreen
+import AddedJobListScreen from './AddedJobListScreen'; // Import AddedJobListScreen
 
 const Tab = createBottomTabNavigator();
 
@@ -23,11 +24,14 @@ const EmployerTabNavigator = () => {
             case 'AddJob':
               iconName = focused ? 'add-circle' : 'add-circle-outline';
               break;
+            case 'AddedJobList':
+              iconName = focused ? 'list' : 'list-outline'; // Icon for AddedJobListScreen
+              break;
             case 'Profile':
               iconName = focused ? 'person' : 'person-outline';
               break;
             case 'ViewApplications':
-              iconName = focused ? 'list' : 'list-outline'; // Updated icon for ViewApplications
+              iconName = focused ? 'document-text' : 'document-text-outline'; // Updated icon for ViewApplications
               break;
             default:
               iconName = 'home'; // Default icon
@@ -44,8 +48,9 @@ const EmployerTabNavigator = () => {
     >
       <Tab.Screen name="CompanyAnalysis" component={CompanyAnalysisScreen} />
       <Tab.Screen name="AddJob" component={AddJobScreen} />
-      <Tab.Screen name="Profile" component={ProfileScreen} />
+      <Tab.Screen name="AddedJobList" component={AddedJobListScreen} />
       <Tab.Screen name="ViewApplications" component={ViewApplicationsScreen} />
+      <Tab.Screen name="Profile" component={ProfileScreen} />
     </Tab.Navigator>
   );
 };

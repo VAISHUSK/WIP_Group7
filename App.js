@@ -12,12 +12,14 @@ import EmployeeTabNavigator from './screens/EmployeeTabNavigator';
 import JobDetailsScreen from './screens/JobDetailsScreen'; // Import JobDetailsScreen
 import ApplyJobScreen from './screens/ApplyJobScreen'; // Import ApplyJobScreen
 import AddJobScreen from './screens/AddJobScreen'; // Import AddJobScreen
+import EditJobScreen from './screens/EditJobScreen'; // Import EditJobScreen
 import CompanyDetailsScreen from './screens/CompanyDetailsScreen'; // Import CompanyDetailsScreen
 import CompanyAnalysisScreen from './screens/CompanyAnalysisScreen'; // Import CompanyAnalysisScreen
 import ProfileScreen from './screens/ProfileScreen'; // Import ProfileScreen
 import EditProfileScreen from './screens/EditProfileScreen'; // Import EditProfileScreen
 import ViewApplicationsScreen from './screens/ViewApplicationsScreen'; // Import ViewApplicationsScreen
 import ApplicationDetailsScreen from './screens/ApplicationDetailsScreen'; // Import ApplicationDetailsScreen
+import AddedJobListScreen from './screens/AddedJobListScreen'; // Import AddedJobListScreen
 import { ActivityIndicator, View } from 'react-native'; // Import ActivityIndicator for loading state
 
 const Stack = createStackNavigator();
@@ -69,6 +71,11 @@ const App = () => {
               options={{ title: 'Add Job' }}
             />
             <Stack.Screen
+              name="EditJob"
+              component={EditJobScreen}
+              options={{ title: 'Edit Job' }}
+            />
+            <Stack.Screen
               name="CompanyDetails"
               component={CompanyDetailsScreen}
               options={{ title: 'Company Details' }}
@@ -98,6 +105,11 @@ const App = () => {
               component={ApplicationDetailsScreen}
               options={{ title: 'Application Details' }}
             />
+            <Stack.Screen
+              name="AddedJobList"
+              component={AddedJobListScreen}
+              options={{ title: 'Added Job List' }}
+            />
           </>
         ) : user.userType === 'employee' ? (
           <>
@@ -120,6 +132,11 @@ const App = () => {
               name="AddJob"
               component={AddJobScreen}
               options={{ title: 'Add Job' }}
+            />
+            <Stack.Screen
+              name="EditJob"
+              component={EditJobScreen}
+              options={{ title: 'Edit Job' }}
             />
             <Stack.Screen
               name="CompanyDetails"

@@ -8,6 +8,7 @@ import Slider from '@react-native-community/slider';
 import { Picker } from '@react-native-picker/picker';
 import { useNavigation } from '@react-navigation/native';
 import * as Location from 'expo-location';
+import CustomMarker from './CustomMarker';
 
 const JobSearchScreen = () => {
   const [searchQuery, setSearchQuery] = useState('');
@@ -125,13 +126,13 @@ const JobSearchScreen = () => {
   );
 
   const renderMapMarkers = () => jobs.map(job => (
-    <Marker
+    <CustomMarker
       key={job.id}
       coordinate={{ latitude: job.latitude, longitude: job.longitude }}
-      title={job.title}
-      description={`${job.company} - ${job.location}, ${job.province}`}
+      title={job.title} // Display the job title as the marker title
+      onPress={() => navigation.navigate('JobDetails', { jobId: job.id })} // Navigate to job details on marker press
     />
-  ));
+  ));  
 
   return (
     <View style={styles.container}>

@@ -2,30 +2,30 @@ import React, { useState, useEffect } from 'react';
 import { View, StyleSheet, ScrollView, ActivityIndicator } from 'react-native';
 import { Text, Avatar, Button, Divider, Icon } from 'react-native-elements';
 import { auth, db } from '../firebaseConfig'; // Import auth and db from your firebaseConfig
-import { doc, getDoc } from 'firebase/firestore'; // Import necessary Firestore methods
+import { doc, onSnapshot } from 'firebase/firestore'; // Import necessary Firestore methods
 
 const ProfileScreen = ({ navigation }) => {
   const [userData, setUserData] = useState(null);
   const [loading, setLoading] = useState(true);
   const user = auth.currentUser;
-
+  
   useEffect(() => {
-    const fetchUserData = async () => {
-      if (user) {
-        try {
-          const userDoc = await getDoc(doc(db, 'Users', user.uid)); // Fetch the document from Firestore
-          if (userDoc.exists()) {
-            setUserData(userDoc.data());
-          }
-        } catch (error) {
-          console.error('Error fetching user data: ', error);
-        } finally {
-          setLoading(false);
-        }
-      }
-    };
+    if (user) {
+      const userDoc = doc(db, 'Users', user.uid);
 
-    fetchUserData();
+      const unsubscribe = onSnapshot(userDoc, (docSnapshot) => {
+        if (docSnapshot.exists()) {
+          setUserData(docSnapshot.data());
+        }
+        setLoading(false);
+      }, (error) => {
+        console.error('Error fetching user data: ', error);
+        setLoading(false);
+      });
+
+      // Cleanup the listener on component unmount
+      return () => unsubscribe();
+    }
   }, [user]);
 
   const handleLogout = async () => {
@@ -48,7 +48,7 @@ const ProfileScreen = ({ navigation }) => {
   // Use default parameters for destructuring userData
   const {
     photoURL = require('../assets/default-avatar.png'), // Default image path
-    displayName = 'User Name',
+    fullName = 'Full Name',
     email = 'User Email',
     phoneNumber = 'Phone Number',
     address = 'Address',
@@ -59,14 +59,13 @@ const ProfileScreen = ({ navigation }) => {
   return (
     <ScrollView contentContainerStyle={styles.scrollContainer}>
       <View style={styles.container}>
-        <Text style={styles.header}>Profile</Text>
         <Avatar
           size="xlarge"
           rounded
           source={typeof photoURL === 'string' ? { uri: photoURL } : photoURL} // Conditional source
           containerStyle={styles.avatar}
         />
-        <Text style={styles.userName}>{displayName}</Text>
+        <Text style={styles.userName}>{fullName}</Text>
         <Text style={styles.email}>{email}</Text>
         <Divider style={styles.divider} />
 

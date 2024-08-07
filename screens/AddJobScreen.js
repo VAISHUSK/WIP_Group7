@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, StyleSheet, Button, FlatList, KeyboardAvoidingView, Platform, Modal, TouchableOpacity } from 'react-native';
+import { View, Text, TextInput, StyleSheet, Button, FlatList, KeyboardAvoidingView, Platform, Modal, TouchableOpacity, ScrollView } from 'react-native';
 import { GooglePlacesAutocomplete } from 'react-native-google-places-autocomplete';
 import Geocoder from 'react-native-geocoding';
 import { Picker } from '@react-native-picker/picker';
@@ -94,118 +94,100 @@ const AddJobScreen = ({ navigation }) => {
       style={styles.container}
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
     >
-      <FlatList
-        data={[
-          { key: 'Job Title', component: (
-            <View style={styles.section}>
-              <Text style={styles.label}>Job Title</Text>
-              <TextInput
-                style={styles.input}
-                placeholder="Job Title"
-                value={title}
-                onChangeText={setTitle}
-              />
-            </View>
-          )},
-          { key: 'Company Name', component: (
-            <View style={styles.section}>
-              <Text style={styles.label}>Company Name</Text>
-              <TextInput
-                style={styles.input}
-                placeholder="Company Name"
-                value={company}
-                onChangeText={setCompany}
-              />
-            </View>
-          )},
-          { key: 'Location', component: (
-            <View style={styles.section}>
-              <Text style={styles.label}>Location</Text>
-              <GooglePlacesAutocomplete  
-                placeholder='Search for an address'        
-                onPress={handleAddressSelect}
-                fetchDetails={true}
-                query={{ key: 'AIzaSyDi08rJ4cV1T-rTcvmWv5Nk_0o6AYfOyGw', language: 'en' }} 
-                styles={{ textInput: styles.input }}
-              />
-            </View>
-          )},
-          { key: 'City', component: (
-            <View style={styles.section}>
-              <Text style={styles.label}>City</Text>
-              <TextInput
-                style={styles.input}
-                placeholder="City"
-                value={city}
-                onChangeText={setCity}
-                editable={false} 
-              />
-            </View>
-          )},
-          { key: 'Province', component: (
-            <View style={styles.section}>
-              <Text style={styles.label}>Province</Text>
-              <Picker
-                selectedValue={province}
-                onValueChange={setProvince}
-                style={styles.picker}
-              >
-                {provinces.map((option) => (
-                  <Picker.Item key={option.value} label={option.label} value={option.value} />
-                ))}
-              </Picker>
-            </View>
-          )},
-          { key: 'Job Type', component: (
-            <View style={styles.section}>
-              <Text style={styles.label}>Job Type</Text>
-              <Picker
-                selectedValue={type}
-                onValueChange={setType}
-                style={styles.picker}
-              >
-                <Picker.Item label="Part-Time" value="Part-Time" />
-                <Picker.Item label="Contract" value="Contract" />
-                <Picker.Item label="Internship" value="Internship" />
-                <Picker.Item label="Full-Time" value="Full-Time" />
-                <Picker.Item label="Permanent" value="Permanent" />
-                <Picker.Item label="Temporary" value="Temporary" />
-              </Picker>
-            </View>
-          )},
-          { key: 'Salary', component: (
-            <View style={styles.section}>
-              <Text style={styles.label}>Salary</Text>
-              <TextInput
-                style={styles.input}
-                placeholder="Salary"
-                value={salary}
-                onChangeText={setSalary}
-                keyboardType="numeric"
-              />
-            </View>
-          )},
-          { key: 'Job Description', component: (
-            <View style={styles.section}>
-              <Text style={styles.label}>Job Description</Text>
-              <TextInput
-                style={[styles.input, styles.textArea]}
-                placeholder="Job Description"
-                value={description}
-                onChangeText={setDescription}
-                multiline={true}
-              />
-            </View>
-          )},
-          { key: 'Submit', component: (
-            <View style={styles.section}>
-              <Button title="Next" onPress={handleSubmit} color="#2196F3" />
-            </View>
-          )},
-        ]}
-        renderItem={({ item }) => item.component}
-        keyExtractor={item => item.key}
-      />
+      <ScrollView
+        keyboardShouldPersistTaps="handled"
+        contentContainerStyle={{ flexGrow: 1 }}
+      >
+        <View style={styles.section}>
+          <Text style={styles.label}>Job Title</Text>
+          <TextInput
+            style={styles.input}
+            placeholder="Job Title"
+            value={title}
+            onChangeText={setTitle}
+          />
+        </View>
+        <View style={styles.section}>
+          <Text style={styles.label}>Company Name</Text>
+          <TextInput
+            style={styles.input}
+            placeholder="Company Name"
+            value={company}
+            onChangeText={setCompany}
+          />
+        </View>
+        <View style={styles.section}>
+          <Text style={styles.label}>Location</Text>
+          <GooglePlacesAutocomplete  
+            placeholder='Search for an address'        
+            onPress={handleAddressSelect}
+            fetchDetails={true}
+            query={{ key: 'AIzaSyDi08rJ4cV1T-rTcvmWv5Nk_0o6AYfOyGw', language: 'en' }} 
+            styles={{ textInput: styles.input }}
+            enablePoweredByContainer={false}
+          />
+        </View>
+        <View style={styles.section}>
+          <Text style={styles.label}>City</Text>
+          <TextInput
+            style={styles.input}
+            placeholder="City"
+            value={city}
+            onChangeText={setCity}
+            editable={false} 
+          />
+        </View>
+        <View style={styles.section}>
+          <Text style={styles.label}>Province</Text>
+          <Picker
+            selectedValue={province}
+            onValueChange={setProvince}
+            style={styles.picker}
+          >
+            {provinces.map((option) => (
+              <Picker.Item key={option.value} label={option.label} value={option.value} />
+            ))}
+          </Picker>
+        </View>
+        <View style={styles.section}>
+          <Text style={styles.label}>Job Type</Text>
+          <Picker
+            selectedValue={type}
+            onValueChange={setType}
+            style={styles.picker}
+          >
+            <Picker.Item label="Part-Time" value="Part-Time" />
+            <Picker.Item label="Contract" value="Contract" />
+            <Picker.Item label="Internship" value="Internship" />
+            <Picker.Item label="Full-Time" value="Full-Time" />
+            <Picker.Item label="Permanent" value="Permanent" />
+            <Picker.Item label="Temporary" value="Temporary" />
+          </Picker>
+        </View>
+        <View style={styles.section}>
+          <Text style={styles.label}>Salary</Text>
+          <TextInput
+            style={styles.input}
+            placeholder="Salary"
+            value={salary}
+            onChangeText={setSalary}
+            keyboardType="numeric"
+          />
+        </View>
+        <View style={styles.section}>
+          <Text style={styles.label}>Job Description</Text>
+          <TextInput
+            style={[styles.input, styles.textArea]}
+            placeholder="Job Description"
+            value={description}
+            onChangeText={setDescription}
+            multiline={true}
+          />
+        </View>
+        <View style={styles.section}>
+          <Button title="Next" onPress={handleSubmit} color="#2196F3" />
+        </View>
+      </ScrollView>
 
       {/* Error Modal */}
       <Modal
@@ -258,7 +240,6 @@ const styles = StyleSheet.create({
     borderColor: '#ccc',
     borderWidth: 1,
     borderRadius: 5,
-    padding: 10,
   },
   modalContainer: {
     flex: 1,
@@ -267,13 +248,16 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0,0,0,0.5)',
   },
   modalView: {
-    margin: 20,
+    width: 300,
     backgroundColor: 'white',
-    borderRadius: 10,
+    borderRadius: 20,
     padding: 35,
     alignItems: 'center',
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
     shadowOpacity: 0.25,
     shadowRadius: 4,
     elevation: 5,
@@ -281,11 +265,10 @@ const styles = StyleSheet.create({
   modalText: {
     marginBottom: 15,
     textAlign: 'center',
-    color:'red',
   },
   closeButton: {
-    backgroundColor: 'black',
-    borderRadius: 5,
+    backgroundColor: '#2196F3',
+    borderRadius: 10,
     padding: 10,
     elevation: 2,
   },

@@ -62,9 +62,9 @@ const ViewApplicationsScreen = () => {
 
   return (
     <ScrollView style={styles.container}>
-      <View style={styles.header}>
+      {/* <View style={styles.header}>
         <Text style={styles.headerText}>Applications</Text>
-      </View>
+      </View> */}
 
       <View style={styles.listContainer}>
         {applications.length > 0 ? (

@@ -17,14 +17,17 @@ const EditProfileScreen = () => {
 
   useEffect(() => {
     const fetchUserData = async () => {
-      const userDoc = await getDoc(doc(db, 'Users', auth.currentUser.uid));
-      if (userDoc.exists()) {
-        const userData = userDoc.data();
-        setUsername(userData.username);
-        setEmail(userData.email);
-        setBio(userData.bio);
-        setPhoneNumber(userData.phoneNumber);
-        setProfilePhoto(userData.profilePhotoURL);
+      const user = auth.currentUser;
+      if (user) {
+        const userDoc = await getDoc(doc(db, 'Users', user.uid));
+        if (userDoc.exists()) {
+          const userData = userDoc.data();
+          setUsername(userData.username);
+          setEmail(userData.email);
+          setBio(userData.bio);
+          setPhoneNumber(userData.phoneNumber);
+          setProfilePhoto(userData.profilePhotoURL);
+        }
       }
     };
     fetchUserData();
@@ -58,29 +61,43 @@ const EditProfileScreen = () => {
     setLoading(true);
     try {
       let profilePhotoURL = profilePhoto;
+      const user = auth.currentUser;
+
+      if (!user) {
+        Alert.alert('Error', 'User not authenticated');
+        return;
+      }
 
       if (profilePhoto && !profilePhoto.startsWith('http')) {
         const response = await fetch(profilePhoto);
         const blob = await response.blob();
-        const photoRef = ref(storage, `profilePhotos/${auth.currentUser.uid}`);
+        const photoRef = ref(storage, `profilePhotos/${user.uid}`);
         await uploadBytes(photoRef, blob);
         profilePhotoURL = await getDownloadURL(photoRef);
       }
 
-      await updateDoc(doc(db, 'Users', auth.currentUser.uid), {
+      const updatedData = {
         username,
         email,
         bio,
         phoneNumber,
-        profilePhotoURL,
-      });
+      };
 
-      await auth.currentUser.updateProfile({
-        displayName: username,
-        photoURL: profilePhotoURL,
-      });
+      if (profilePhotoURL) {
+        updatedData.profilePhotoURL = profilePhotoURL;
+      }
 
-      navigation.navigate('Profile');
+      await updateDoc(doc(db, 'Users', user.uid), updatedData);
+
+      if (user.updateProfile) {
+        await user.updateProfile({
+          displayName: username,
+          photoURL: profilePhotoURL || user.photoURL,
+        });
+      }
+
+      // Navigate back to the ProfileScreen
+      navigation.goBack();
     } catch (error) {
       console.error('Error updating profile:', error);
       Alert.alert('Error', 'Failed to update profile');
