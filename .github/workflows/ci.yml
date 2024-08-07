@@ -1,0 +1,38 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest  # Use ubuntu-latest for cross-platform builds
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Set up Node.js
+      uses: actions/setup-node@v2
+      with:
+        node-version: '16'  # Specify Node.js version as per your project needs
+
+    - name: Install dependencies
+      run: |
+        npm install
+
+    - name: Run lint
+      run: |
+        npm run lint  # Ensure this script is defined in your package.json
+
+    - name: Run tests
+      run: |
+        npm test  # Ensure this script is defined in your package.json
+
+    - name: Build app (Expo)
+      run: |
+        npx expo build:web  # Optional, if you want to build a web version
