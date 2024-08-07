@@ -1,99 +1,89 @@
-// CompanyAnalysisScreen.js
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, ScrollView } from 'react-native';
-import { BarChart, PieChart } from 'react-native-chart-kit';
-import { Dimensions } from 'react-native';
-import { db } from '../firebaseConfig'; // Adjust the path according to your setup
+import { View, Text, StyleSheet, Dimensions, ScrollView } from 'react-native';
+import { collection, query, where, onSnapshot } from 'firebase/firestore';
+import { db } from '../firebaseConfig'; // Ensure this import matches your file structure
+import { PieChart } from 'react-native-chart-kit'; // Import PieChart component
+import { useUser } from '../UserContext'; // Import UserContext
 
 const screenWidth = Dimensions.get('window').width;
 
 const CompanyAnalysisScreen = () => {
   const [applications, setApplications] = useState([]);
-  const [applicationsByPosition, setApplicationsByPosition] = useState([]);
   const [applicationsByStatus, setApplicationsByStatus] = useState([]);
+  const { user, loading } = useUser(); // Get user from UserContext
 
   useEffect(() => {
-    // Fetch applications data from Firestore
+    if (loading) {
+      console.log('Loading user data...');
+      return;
+    }
+
+    if (!user) {
+      console.log('No user is logged in.');
+      return;
+    }
+
+    console.log('Logged in user email:', user.email); // Log the user email
+
+    // Fetch applications for the logged-in user
     const fetchApplications = async () => {
       try {
-        const snapshot = await db.collection('applications').get();
-        const fetchedApplications = snapshot.docs.map(doc => doc.data());
+        const applicationsRef = collection(db, 'applications');
+        const q = query(applicationsRef, where('createdBy', '==', user.email)); // Filter by logged-in user's email
 
-        setApplications(fetchedApplications);
+        const unsubscribe = onSnapshot(q, (querySnapshot) => {
+          const apps = [];
+          querySnapshot.forEach((doc) => {
+            const appData = { id: doc.id, ...doc.data() };
+            console.log('Application createdBy:', appData.createdBy); // Log createdBy field
+            apps.push(appData);
+          });
+          setApplications(apps);
 
-        // Process data for charts
-        const positionCounts = {};
-        const statusCounts = {};
+          // Process data for pie chart
+          const statusCounts = {};
 
-        fetchedApplications.forEach(app => {
-          // Count applications by position
-          positionCounts[app.position] = (positionCounts[app.position] || 0) + 1;
+          apps.forEach(app => {
+            statusCounts[app.status] = (statusCounts[app.status] || 0) + 1;
+          });
 
-          // Count applications by status
-          statusCounts[app.status] = (statusCounts[app.status] || 0) + 1;
+          // Convert counts to array for chart
+          setApplicationsByStatus(Object.keys(statusCounts).map(key => ({
+            name: key,
+            population: statusCounts[key],
+            color: getRandomColor(),
+            legendFontColor: "#7F7F7F",
+            legendFontSize: 15
+          })));
+        }, (error) => {
+          console.error('Error fetching applications:', error);
         });
 
-        // Convert counts to arrays for charts
-        setApplicationsByPosition(Object.keys(positionCounts).map(key => ({ name: key, applications: positionCounts[key] })));
-        setApplicationsByStatus(Object.keys(statusCounts).map(key => ({ name: key, applications: statusCounts[key] })));
+        return () => unsubscribe();
       } catch (error) {
-        console.error('Failed to fetch applications:', error);
+        console.error('Error fetching applications:', error);
       }
     };
 
     fetchApplications();
-  }, []);
+  }, [user, loading]);
 
   return (
-    <View style={styles.container}>
-      <ScrollView contentContainerStyle={styles.scrollContainer}>
-        {applications.length === 0 ? (
-          <View style={styles.noApplicationsContainer}>
-            <Text style={styles.noApplicationsText}>No applications found.</Text>
-          </View>
-        ) : (
-          <>
-            <View style={styles.chartContainer}>
-              <Text style={styles.chartTitle}>Applications by Job Position</Text>
-              <BarChart
-                data={{
-                  labels: applicationsByPosition.map(item => item.name),
-                  datasets: [{
-                    data: applicationsByPosition.map(item => item.applications),
-                  }],
-                }}
-                width={screenWidth - 32} // Adjust width as needed
-                height={220}
-                yAxisLabel=""
-                chartConfig={chartConfig}
-                verticalLabelRotation={30}
-                style={styles.chart}
-              />
-            </View>
-
-            <View style={styles.chartContainer}>
-              <Text style={styles.chartTitle}>Applications by Status</Text>
-              <PieChart
-                data={applicationsByStatus.map(item => ({
-                  name: item.name,
-                  population: item.applications,
-                  color: getRandomColor(),
-                  legendFontColor: "#7F7F7F",
-                  legendFontSize: 15
-                }))}
-                width={screenWidth - 32} // Adjust width as needed
-                height={220}
-                chartConfig={chartConfig}
-                accessor="population"
-                backgroundColor="transparent"
-                paddingLeft="15"
-                style={styles.chart}
-              />
-            </View>
-          </>
-        )}
-      </ScrollView>
-    </View>
+    <ScrollView style={styles.container}>
+      <View style={styles.chartContainer}>
+        <Text style={styles.chartTitle}>Applications by Status</Text>
+        <PieChart
+          data={applicationsByStatus}
+          width={screenWidth - 32} // Adjust width as needed
+          height={220}
+          chartConfig={chartConfig}
+          accessor="population"
+          backgroundColor="transparent"
+          paddingLeft="15"
+          style={styles.chart}
+        />
+      </View>
+    </ScrollView>
   );
 };
 
@@ -121,12 +111,8 @@ const chartConfig = {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: '#f5f5f5',
     padding: 16,
-    backgroundColor: '#fff',
-  },
-  scrollContainer: {
-    flexGrow: 1,
-    justifyContent: 'flex-start',
   },
   chartContainer: {
     marginBottom: 24,
@@ -138,16 +124,6 @@ const styles = StyleSheet.create({
   },
   chart: {
     borderRadius: 16,
-  },
-  noApplicationsContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  noApplicationsText: {
-    fontSize: 18,
-    color: '#888',
-    fontStyle: 'italic',
   },
 });
 

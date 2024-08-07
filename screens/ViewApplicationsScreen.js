@@ -1,9 +1,16 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Button } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
 import { collection, query, where, onSnapshot, doc, updateDoc } from 'firebase/firestore';
 import { db } from '../firebaseConfig'; // Ensure this import matches your file structure
 import { useNavigation } from '@react-navigation/native';
 import { useUser } from '../UserContext'; // Import your UserContext
+import RNPickerSelect from 'react-native-picker-select'; // Import RNPickerSelect
+
+const STATUS_OPTIONS = [
+  { label: 'Interview', value: 'Interview' },
+  { label: 'Offer', value: 'Offer' },
+  { label: 'Rejected', value: 'Rejected' },
+];
 
 const ViewApplicationsScreen = () => {
   const [applications, setApplications] = useState([]);
@@ -35,7 +42,8 @@ const ViewApplicationsScreen = () => {
         const unsubscribe = onSnapshot(q, (querySnapshot) => {
           const apps = [];
           querySnapshot.forEach((doc) => {
-            apps.push({ id: doc.id, ...doc.data() });
+            const appData = { id: doc.id, ...doc.data() };
+            apps.push(appData);
           });
           setApplications(apps);
         }, (error) => {
@@ -62,38 +70,29 @@ const ViewApplicationsScreen = () => {
 
   return (
     <ScrollView style={styles.container}>
-      {/* <View style={styles.header}>
-        <Text style={styles.headerText}>Applications</Text>
-      </View> */}
-
       <View style={styles.listContainer}>
         {applications.length > 0 ? (
           applications.map((app) => (
-            <TouchableOpacity
-              key={app.id}
-              style={styles.application}
-              onPress={() => navigation.navigate('ApplicationDetails', { applicationId: app.id })}
-            >
-              <Text style={styles.label}>Name: {app.applicantName}</Text>
-              <Text style={styles.label}>Email: {app.applicantEmail}</Text>
-              {app.resume && <Text style={styles.label}>Resume: {app.resume}</Text>}
-              {app.coverLetter && <Text style={styles.label}>Cover Letter: {app.coverLetter}</Text>}
+            <View key={app.id} style={styles.application}>
+              <TouchableOpacity
+                onPress={() => navigation.navigate('ApplicationDetails', { applicationId: app.id })}
+              >
+                <Text style={styles.label}>Name: {app.applicantName}</Text>
+                <Text style={styles.label}>Email: {app.applicantEmail}</Text>
+                {app.resume && <Text style={styles.label}>Resume: {app.resume}</Text>}
+                {app.coverLetter && <Text style={styles.label}>Cover Letter: {app.coverLetter}</Text>}
+              </TouchableOpacity>
               <View style={styles.separator} />
               <View style={styles.statusContainer}>
-                <Button
-                  title="Interview"
-                  onPress={() => handleStatusChange(app.id, 'Interview')}
-                />
-                <Button
-                  title="Offer"
-                  onPress={() => handleStatusChange(app.id, 'Offer')}
-                />
-                <Button
-                  title="Rejected"
-                  onPress={() => handleStatusChange(app.id, 'Rejected')}
+                <RNPickerSelect
+                  placeholder={{ label: 'Select status...', value: null }}
+                  items={STATUS_OPTIONS}
+                  onValueChange={(value) => handleStatusChange(app.id, value)}
+                  value={app.status} // Set the current status as the default value
+                  style={pickerSelectStyles}
                 />
               </View>
-            </TouchableOpacity>
+            </View>
           ))
         ) : (
           <Text style={styles.noApplications}>No applications yet.</Text>
@@ -103,22 +102,32 @@ const ViewApplicationsScreen = () => {
   );
 };
 
+// Styles for the picker
+const pickerSelectStyles = StyleSheet.create({
+  inputIOS: {
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderWidth: 1,
+    borderColor: '#ccc',
+    borderRadius: 4,
+    color: 'black',
+    fontSize: 16,
+  },
+  inputAndroid: {
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderWidth: 1,
+    borderColor: '#ccc',
+    borderRadius: 4,
+    color: 'black',
+    fontSize: 16,
+  },
+});
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#f5f5f5',
-  },
-  header: {
-    backgroundColor: '#007bff',
-    paddingVertical: 20,
-    alignItems: 'center',
-    borderBottomLeftRadius: 8,
-    borderBottomRightRadius: 8,
-  },
-  headerText: {
-    fontSize: 24,
-    color: '#fff',
-    fontWeight: 'bold',
   },
   listContainer: {
     padding: 16,
@@ -146,8 +155,6 @@ const styles = StyleSheet.create({
     color: '#888',
   },
   statusContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
     marginTop: 10,
   },
 });
