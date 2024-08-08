@@ -207,7 +207,7 @@ const JobSearchScreen = () => {
           <View style={styles.modalContainer}>
             <View style={styles.modalContent}>
               <TouchableOpacity style={styles.closeButton} onPress={() => setModalVisible(false)}>
-                <Ionicons name="close" size={24} color="#000" />
+                <Ionicons name="close" size={24} color="#007bff" />
               </TouchableOpacity>
               <Text style={styles.modalTitle}>Filters</Text>
               <Text style={styles.filterLabel}>Job Type</Text>
@@ -304,9 +304,10 @@ const styles = StyleSheet.create({
   input: {
     flex: 1,
     borderWidth: 1,
-    borderColor: '#ddd',
+    borderColor: '#007bff',
     borderRadius: 4,
     padding: 8,
+    backgroundColor: '#f0faff',
   },
   searchButton: {
     backgroundColor: '#007bff',
@@ -319,15 +320,22 @@ const styles = StyleSheet.create({
   suggestionsContainer: {
     paddingHorizontal: 10,
     paddingVertical: 5,
+    backgroundColor: '#f0faff',
+    borderBottomWidth: 1,
+    borderBottomColor: '#007bff',
   },
   suggestionText: {
     padding: 5,
     fontSize: 16,
+    color: '#007bff',
   },
   filterContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     padding: 10,
+    backgroundColor: '#f0faff',
+    borderBottomWidth: 1,
+    borderBottomColor: '#007bff',
   },
   filterButton: {
     backgroundColor: '#007bff',
@@ -350,6 +358,7 @@ const styles = StyleSheet.create({
     padding: 15,
     borderBottomWidth: 1,
     borderBottomColor: '#ddd',
+    backgroundColor: '#f0faff',
   },
   jobDetails: {
     flexDirection: 'column',
@@ -357,6 +366,7 @@ const styles = StyleSheet.create({
   jobTitle: {
     fontSize: 18,
     fontWeight: 'bold',
+    color: '#007bff',
   },
   jobCompany: {
     fontSize: 16,
@@ -392,20 +402,24 @@ const styles = StyleSheet.create({
   },
   closeButton: {
     alignSelf: 'flex-end',
+    marginBottom: 20,
   },
   modalTitle: {
     fontSize: 20,
     fontWeight: 'bold',
+    color: '#007bff',
     marginBottom: 10,
   },
   filterLabel: {
     fontSize: 16,
     fontWeight: 'bold',
+    color: '#007bff',
     marginBottom: 5,
   },
   picker: {
     width: '100%',
     height: 50,
+    color: '#007bff',
   },
   salaryRangeContainer: {
     flexDirection: 'row',
@@ -415,10 +429,11 @@ const styles = StyleSheet.create({
   },
   salaryInput: {
     borderWidth: 1,
-    borderColor: '#ddd',
+    borderColor: '#007bff',
     borderRadius: 4,
     padding: 8,
     width: '45%',
+    backgroundColor: '#f0faff',
   },
   slider: {
     width: '100%',

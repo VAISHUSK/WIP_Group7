@@ -23,7 +23,6 @@ const ProfileScreen = ({ navigation }) => {
         setLoading(false);
       });
 
-      // Cleanup the listener on component unmount
       return () => unsubscribe();
     }
   }, [user]);
@@ -42,12 +41,11 @@ const ProfileScreen = ({ navigation }) => {
   };
 
   if (loading) {
-    return <ActivityIndicator size="large" color="#0000ff" style={{ flex: 1 }} />;
+    return <ActivityIndicator size="large" color="#0000ff" style={styles.loadingIndicator} />;
   }
 
-  // Use default parameters for destructuring userData
   const {
-    photoURL = require('../assets/default-avatar.png'), // Default image path
+    photoURL = require('../assets/default-avatar.png'),
     fullName = 'Full Name',
     email = 'User Email',
     phoneNumber = 'Phone Number',
@@ -62,7 +60,7 @@ const ProfileScreen = ({ navigation }) => {
         <Avatar
           size="xlarge"
           rounded
-          source={typeof photoURL === 'string' ? { uri: photoURL } : photoURL} // Conditional source
+          source={typeof photoURL === 'string' ? { uri: photoURL } : photoURL}
           containerStyle={styles.avatar}
         />
         <Text style={styles.userName}>{fullName}</Text>
@@ -70,15 +68,15 @@ const ProfileScreen = ({ navigation }) => {
         <Divider style={styles.divider} />
 
         <View style={styles.infoContainer}>
-          <Icon name="phone" type="font-awesome" color="gray" style={styles.icon} />
+          <Icon name="phone" type="font-awesome" color="#2D9CDB" style={styles.icon} />
           <Text style={styles.infoText}>{phoneNumber}</Text>
         </View>
         <View style={styles.infoContainer}>
-          <Icon name="map-marker" type="font-awesome" color="gray" style={styles.icon} />
+          <Icon name="map-marker" type="font-awesome" color="#2D9CDB" style={styles.icon} />
           <Text style={styles.infoText}>{address}</Text>
         </View>
         <View style={styles.infoContainer}>
-          <Icon name="briefcase" type="font-awesome" color="gray" style={styles.icon} />
+          <Icon name="briefcase" type="font-awesome" color="#2D9CDB" style={styles.icon} />
           <Text style={styles.infoText}>{jobTitle}</Text>
         </View>
 
@@ -106,7 +104,7 @@ const ProfileScreen = ({ navigation }) => {
 const styles = StyleSheet.create({
   scrollContainer: {
     flexGrow: 1,
-    backgroundColor: '#f8f8f8',
+    backgroundColor: '#E0F7FA', // Sky blue background
     paddingVertical: 20,
   },
   container: {
@@ -114,59 +112,66 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     padding: 20,
   },
-  header: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    marginBottom: 20,
-    color: '#333',
+  loadingIndicator: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   avatar: {
     marginBottom: 20,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 6,
+    elevation: 5,
   },
   userName: {
-    fontSize: 22,
+    fontSize: 24,
     fontWeight: 'bold',
+    color: '#0277BD', // Darker blue for text
     marginBottom: 5,
-    color: '#555',
   },
   email: {
-    fontSize: 18,
-    color: 'gray',
+    fontSize: 16,
+    color: '#0277BD', // Darker blue for email
     marginBottom: 20,
   },
   divider: {
-    backgroundColor: '#ddd',
+    backgroundColor: '#B3E5FC', // Light blue for divider
     height: 1,
     width: '100%',
-    marginVertical: 20,
+    marginVertical: 15,
   },
   infoContainer: {
     flexDirection: 'row',
     alignItems: 'center',
     marginBottom: 15,
+    backgroundColor: '#FFFFFF', // White background for info containers
+    padding: 10,
+    borderRadius: 10,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 3,
   },
   icon: {
     marginRight: 10,
   },
   infoText: {
-    fontSize: 18,
-    color: '#555',
+    fontSize: 16,
+    color: '#333333',
   },
   bioHeader: {
     fontSize: 22,
     fontWeight: 'bold',
+    color: '#0277BD', // Darker blue for bio header
     marginBottom: 10,
     alignSelf: 'flex-start',
-    color: '#333',
   },
   bioText: {
     fontSize: 16,
-    color: '#666',
+    color: '#555555',
     marginBottom: 20,
     textAlign: 'left',
   },
@@ -175,11 +180,11 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   editButton: {
-    backgroundColor: 'dodgerblue',
+    backgroundColor: '#0288D1', // Bright blue for edit button
     borderRadius: 5,
   },
   logoutButton: {
-    backgroundColor: 'crimson',
+    backgroundColor: '#D32F2F', // Red for logout button
     borderRadius: 5,
   },
 });

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, Pressable, StyleSheet, TextInput, Image, FlatList, Modal, Button, ScrollView } from 'react-native';
+import { View, Text, Pressable, StyleSheet, Image, FlatList, Modal, Button, ScrollView } from 'react-native';
 import { collection, query, where, getDocs } from 'firebase/firestore';
 import { db } from '../firebaseConfig';
 import { useUser } from '../UserContext'; // Import the useUser hook
@@ -8,7 +8,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage'; // Correct
 const PrivacyPolicyModal = ({ visible, onAccept }) => {
   return (
     <Modal visible={visible} animationType="slide">
-      <View style={styles.container}>
+      <View style={styles.modalContainer}>
         <ScrollView contentContainerStyle={styles.scrollContainer}>
           <Text style={styles.header}>Privacy Policy</Text>
           <Text style={styles.content}>
@@ -46,7 +46,7 @@ const PrivacyPolicyModal = ({ visible, onAccept }) => {
 
             For more details, please refer to our full Privacy Policy on our website.
           </Text>
-          <Button title="Accept" onPress={onAccept} />
+          <Button title="Accept" onPress={onAccept} color="black" />
         </ScrollView>
       </View>
     </Modal>
@@ -54,8 +54,6 @@ const PrivacyPolicyModal = ({ visible, onAccept }) => {
 };
 
 const LandingScreen = ({ navigation }) => {
-  const [searchQuery, setSearchQuery] = useState('');
-  const [filteredJobs, setFilteredJobs] = useState([]);
   const [suggestions, setSuggestions] = useState([]);
   const [privacyPolicyAccepted, setPrivacyPolicyAccepted] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -75,37 +73,6 @@ const LandingScreen = ({ navigation }) => {
 
     checkPrivacyPolicy();
   }, []);
-
-  useEffect(() => {
-    fetchSuggestions();
-  }, [searchQuery]);
-
-  const fetchSuggestions = async () => {
-    if (searchQuery.length < 1) {
-      setSuggestions([]);
-      return;
-    }
-
-    try {
-      const q = query(
-        collection(db, 'jobs'),
-        where('title', '>=', searchQuery),
-        where('title', '<=', searchQuery + '\uf8ff')
-      );
-      const querySnapshot = await getDocs(q);
-      const suggestionsList = querySnapshot.docs.map(doc => doc.data().title);
-      setSuggestions(suggestionsList);
-    } catch (error) {
-      console.error('Error fetching suggestions:', error);
-    }
-  };
-
-  const handleSearch = () => {
-    if (searchQuery.trim()) {
-      // Navigate to job listings screen with the search query
-      navigation.navigate('JobListings', { query: searchQuery });
-    }
-  };
 
   const handleSuggestionPress = (title) => {
     if (user) {
@@ -129,25 +96,16 @@ const LandingScreen = ({ navigation }) => {
 
   if (loading) {
     // Optionally display a loading spinner or message while loading
-    return <View style={styles.container}><Text>Loading...</Text></View>;
+    return <View style={styles.container}><Text style={styles.loadingText}>Loading...</Text></View>;
   }
 
   return (
     <View style={styles.container}>
-      <Image source={require('../assets/logo.png')} style={styles.logo} />
-      <Text style={styles.title}>Jobs Daily</Text>
-      <View style={styles.searchContainer}>
-        <TextInput
-          style={styles.input}
-          placeholder="Search for jobs..."
-          value={searchQuery}
-          onChangeText={setSearchQuery}
-        />
-        <Pressable style={styles.searchButton} onPress={handleSearch}>
-          <Text style={styles.buttonText}>Search</Text>
-        </Pressable>
+      <View style={styles.imageContainer}>
+        <Image source={require('../assets/logo.png')} style={styles.logo} />
       </View>
-      {searchQuery ? (
+      <Text style={styles.title}>Jobs Daily</Text>
+      {suggestions.length > 0 && (
         <FlatList
           data={suggestions}
           keyExtractor={(item, index) => index.toString()}
@@ -157,7 +115,7 @@ const LandingScreen = ({ navigation }) => {
             </Pressable>
           )}
         />
-      ) : null}
+      )}
       <Pressable style={styles.button} onPress={() => navigation.navigate('Login')}>
         <Text style={styles.buttonText}>Login</Text>
       </Pressable>
@@ -178,40 +136,34 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#f0f0f0',
+    backgroundColor: '#87CEEB', // Sky blue background color
     padding: 20,
+  },
+  imageContainer: {
+    width: 150,
+    height: 150,
+    marginBottom: 20,
+    borderRadius: 75, // Makes the image circular
+    overflow: 'hidden', // Ensures image stays within the rounded container
+    backgroundColor: '#87CEEB', // Background color to match the container
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   logo: {
     width: 150,
     height: 150,
-    marginBottom: 20,
+    borderRadius: 75, // Matches the container's border radius
+    opacity: 0.9, // Slightly transparent to blend with background
   },
   title: {
-    fontSize: 24,
-    fontWeight: 'bold',
+    fontSize: 36, // Increased font size
+    fontWeight: 'bold', // Bold font weight
+    color: 'white', // White color for better contrast
     marginBottom: 20,
-  },
-  searchContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 20,
-    width: '100%',
-  },
-  input: {
-    flex: 1,
-    height: 50,
-    borderColor: 'gray',
-    borderWidth: 1,
-    padding: 10,
-    borderRadius: 5,
-    backgroundColor: '#fff',
-  },
-  searchButton: {
-    backgroundColor: 'black',
-    padding: 15,
-    borderRadius: 5,
-    marginLeft: 10,
-    alignItems: 'center',
+    textShadowColor: '#000', // Black shadow for contrast
+    textShadowOffset: { width: 2, height: 2 }, // Shadow offset
+    textShadowRadius: 5, // Shadow blur radius
+    fontFamily: 'Cochin', // Custom font family, replace with a custom font if available
   },
   suggestion: {
     backgroundColor: '#fff',
@@ -232,18 +184,31 @@ const styles = StyleSheet.create({
     color: 'white',
     fontWeight: 'bold',
   },
+  modalContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#87CEEB', // Sky blue background color
+  },
   scrollContainer: {
     flexGrow: 1,
     justifyContent: 'center',
+    padding: 20,
   },
   header: {
     fontSize: 24,
     fontWeight: 'bold',
     marginBottom: 20,
+    color: '#333',
   },
   content: {
     fontSize: 16,
+    color: '#666',
     marginBottom: 20,
+  },
+  loadingText: {
+    fontSize: 16,
+    color: '#666',
   },
 });
 

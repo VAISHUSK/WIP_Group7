@@ -1,7 +1,6 @@
-// screens/BottomTabNavigator.js
 import React from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { Ionicons } from '@expo/vector-icons'; // Make sure you have Ionicons installed or import icons from another source
+import { Ionicons } from '@expo/vector-icons'; // Ensure Ionicons is installed
 
 import JobSearchScreen from './JobSearchScreen';
 import AdminPanelScreen from './AdminPanelScreen';
@@ -29,24 +28,34 @@ const BottomTabNavigator = ({ userType }) => {
 
           return <Ionicons name={iconName} size={size} color={color} />;
         },
+        tabBarStyle: {
+          backgroundColor: '#fff', // Tab bar background color
+          borderTopColor: '#ddd', // Border color on top of the tab bar
+          borderTopWidth: 1,
+          height: 60, // Tab bar height
+        },
+        tabBarLabelStyle: {
+          fontSize: 12, // Label font size
+          fontWeight: 'bold', // Label font weight
+        },
+        tabBarActiveTintColor: '#007bff', // Active tab color
+        tabBarInactiveTintColor: 'gray', // Inactive tab color
+        tabBarIconStyle: {
+          marginBottom: 5, // Margin for icons
+        },
       })}
-      tabBarOptions={{
-        activeTintColor: 'tomato',
-        inactiveTintColor: 'gray',
-      }}
     >
       {userType === 'employee' && (
         <>
-          <Tab.Screen name="JobSearch" component={JobSearchScreen} />
-          <Tab.Screen name="Notifications" component={NotificationsScreen} />
-          <Tab.Screen name="Profile" component={ProfileScreen} />
-
+          <Tab.Screen name="JobSearch" component={JobSearchScreen} options={{ title: 'Job Search' }} />
+          <Tab.Screen name="Notifications" component={NotificationsScreen} options={{ title: 'Notifications' }} />
+          <Tab.Screen name="Profile" component={ProfileScreen} options={{ title: 'Profile' }} />
         </>
       )}
       {userType === 'employer' && (
         <>
-          <Tab.Screen name="AdminPanel" component={AdminPanelScreen} />
-          <Tab.Screen name="Profile" component={ProfileScreen} />
+          <Tab.Screen name="AdminPanel" component={AdminPanelScreen} options={{ title: 'Admin Panel' }} />
+          <Tab.Screen name="Profile" component={ProfileScreen} options={{ title: 'Profile' }} />
         </>
       )}
     </Tab.Navigator>

@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
 import { collection, query, where, onSnapshot, doc, updateDoc } from 'firebase/firestore';
-import { db } from '../firebaseConfig'; // Ensure this import matches your file structure
+import { db } from '../firebaseConfig';
 import { useNavigation } from '@react-navigation/native';
-import { useUser } from '../UserContext'; // Import your UserContext
-import RNPickerSelect from 'react-native-picker-select'; // Import RNPickerSelect
+import { useUser } from '../UserContext';
+import RNPickerSelect from 'react-native-picker-select';
 
 const STATUS_OPTIONS = [
   { label: 'Interview', value: 'Interview' },
@@ -15,29 +15,15 @@ const STATUS_OPTIONS = [
 const ViewApplicationsScreen = () => {
   const [applications, setApplications] = useState([]);
   const navigation = useNavigation();
-  const { user, loading } = useUser(); // Get user from UserContext
+  const { user, loading } = useUser();
 
   useEffect(() => {
-    if (loading) {
-      console.log('Loading user data...');
-      return;
-    }
+    if (loading || !user) return;
 
-    if (!user) {
-      console.log('No user is logged in.');
-      return;
-    }
-
-    console.log('Logged in user email:', user.email); // Log the user email
-
-    // Function to fetch applications created by the logged-in user
     const fetchApplications = async () => {
       try {
         const applicationsRef = collection(db, 'applications');
-        const q = query(
-          applicationsRef,
-          where('createdBy', '==', user.email) // Compare createdBy with logged-in user's email
-        );
+        const q = query(applicationsRef, where('createdBy', '==', user.email));
 
         const unsubscribe = onSnapshot(q, (querySnapshot) => {
           const apps = [];
@@ -88,7 +74,7 @@ const ViewApplicationsScreen = () => {
                   placeholder={{ label: 'Select status...', value: null }}
                   items={STATUS_OPTIONS}
                   onValueChange={(value) => handleStatusChange(app.id, value)}
-                  value={app.status} // Set the current status as the default value
+                  value={app.status}
                   style={pickerSelectStyles}
                 />
               </View>
@@ -108,18 +94,20 @@ const pickerSelectStyles = StyleSheet.create({
     paddingHorizontal: 12,
     paddingVertical: 8,
     borderWidth: 1,
-    borderColor: '#ccc',
-    borderRadius: 4,
-    color: 'black',
+    borderColor: '#bbb',
+    borderRadius: 8,
+    backgroundColor: '#fff',
+    color: '#333',
     fontSize: 16,
   },
   inputAndroid: {
     paddingHorizontal: 12,
     paddingVertical: 8,
     borderWidth: 1,
-    borderColor: '#ccc',
-    borderRadius: 4,
-    color: 'black',
+    borderColor: '#bbb',
+    borderRadius: 8,
+    backgroundColor: '#fff',
+    color: '#333',
     fontSize: 16,
   },
 });
@@ -127,21 +115,26 @@ const pickerSelectStyles = StyleSheet.create({
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: '#87CEEB', // Sky blue background
   },
   listContainer: {
     padding: 16,
   },
   application: {
-    backgroundColor: '#fff',
-    borderRadius: 8,
+    backgroundColor: '#ffffff',
+    borderRadius: 10,
     padding: 16,
     marginBottom: 16,
-    elevation: 2,
+    elevation: 3,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 5,
   },
   label: {
     fontSize: 16,
     fontWeight: '600',
+    color: '#333',
     marginBottom: 8,
   },
   separator: {
@@ -152,7 +145,8 @@ const styles = StyleSheet.create({
   noApplications: {
     textAlign: 'center',
     fontSize: 16,
-    color: '#888',
+    color: '#555',
+    marginTop: 20,
   },
   statusContainer: {
     marginTop: 10,

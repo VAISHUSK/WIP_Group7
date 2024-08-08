@@ -68,7 +68,7 @@ const NotificationsScreen = () => {
         <Text style={styles.notificationTitle}>{item.title}</Text>
         <Text style={styles.notificationMessage}>{item.message}</Text>
       </View>
-      <Icon name="chevron-right" type="font-awesome" color="#999" />
+      <Icon name="chevron-right" type="font-awesome" color="#007bff" />
     </TouchableOpacity>
   );
 
@@ -91,7 +91,7 @@ const NotificationsScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f0f0f0',
+    backgroundColor: '#f0faff', // Sky blue background
     paddingHorizontal: 16,
     paddingTop: 20,
   },
@@ -115,6 +115,7 @@ const styles = StyleSheet.create({
   notificationTitle: {
     fontSize: 18,
     fontWeight: 'bold',
+    color: '#007bff', // Sky blue text
     marginBottom: 4,
   },
   notificationMessage: {

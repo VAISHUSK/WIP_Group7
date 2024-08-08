@@ -3,7 +3,6 @@ import { View, Text, FlatList, StyleSheet, TouchableOpacity, Alert, ActivityIndi
 import { collection, query, where, doc, deleteDoc, onSnapshot } from 'firebase/firestore';
 import { db } from '../firebaseConfig'; // Update path as needed
 import { getAuth } from 'firebase/auth';
-
 const AddedJobListScreen = ({ navigation }) => {
   const [jobs, setJobs] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -55,7 +54,7 @@ const AddedJobListScreen = ({ navigation }) => {
   if (loading) {
     return (
       <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#0000ff" />
+        <ActivityIndicator size="large" color="#003366" />
       </View>
     );
   }
@@ -101,7 +100,8 @@ const AddedJobListScreen = ({ navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 10,
+    padding: 20,
+    backgroundColor: '#FFFFFF',
   },
   loadingContainer: {
     flex: 1,
@@ -110,7 +110,7 @@ const styles = StyleSheet.create({
   },
   errorText: {
     textAlign: 'center',
-    color: 'red',
+    color: '#F44336',
     fontSize: 18,
     margin: 20,
   },
@@ -125,28 +125,31 @@ const styles = StyleSheet.create({
     fontStyle: 'italic',
   },
   jobContainer: {
-    padding: 15,
-    marginBottom: 10,
-    backgroundColor: '#f9f9f9',
+    padding: 20,
+    marginBottom: 15,
+    backgroundColor: '#f1f9ff',
     borderRadius: 10,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
+    shadowOpacity: 0.2,
     shadowRadius: 5,
     elevation: 3,
+    borderLeftWidth: 5,
+    borderLeftColor: '#003366',
   },
   jobDetails: {
-    marginBottom: 10,
+    marginBottom: 15,
   },
   jobTitle: {
-    fontSize: 20,
+    fontSize: 22,
     fontWeight: 'bold',
-    marginBottom: 5,
+    color: '#003366',
+    marginBottom: 8,
   },
   jobDescription: {
     fontSize: 16,
     color: '#666',
-    marginBottom: 5,
+    marginBottom: 8,
   },
   jobLocation: {
     fontSize: 16,
@@ -156,7 +159,6 @@ const styles = StyleSheet.create({
   jobSalary: {
     fontSize: 16,
     color: '#444',
-    marginBottom: 10,
   },
   actionsContainer: {
     flexDirection: 'row',
@@ -164,17 +166,20 @@ const styles = StyleSheet.create({
   },
   editButton: {
     backgroundColor: '#4CAF50',
-    padding: 10,
+    paddingVertical: 10,
+    paddingHorizontal: 20,
     borderRadius: 5,
   },
   deleteButton: {
     backgroundColor: '#F44336',
-    padding: 10,
+    paddingVertical: 10,
+    paddingHorizontal: 20,
     borderRadius: 5,
   },
   actionText: {
     color: 'white',
     fontWeight: 'bold',
+    textAlign: 'center',
   },
 });
 

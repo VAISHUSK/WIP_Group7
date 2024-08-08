@@ -236,14 +236,14 @@ const SignUpScreen = () => {
 const styles = StyleSheet.create({
   scrollContainer: {
     flexGrow: 1,
-    backgroundColor: '#f8f8f8',
+    backgroundColor: '#87CEEB', // Sky blue background
     paddingVertical: 20,
   },
   container: {
     flex: 1,
     justifyContent: 'center',
     padding: 16,
-    backgroundColor: '#f0f0f0',
+    backgroundColor: '#87CEEB', // Sky blue background
   },
   logo: {
     width: 150,
@@ -256,14 +256,16 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     textAlign: 'center',
     marginBottom: 20,
+    color: 'white', // White color for the title
   },
   input: {
     height: 40,
-    borderColor: 'gray',
+    borderColor: 'white', // White border color
     borderWidth: 1,
     marginBottom: 12,
     paddingHorizontal: 8,
     borderRadius: 5,
+    backgroundColor: 'white', // White background for input fields
   },
   bioInput: {
     height: 80,
@@ -273,16 +275,17 @@ const styles = StyleSheet.create({
     height: 50,
     width: '100%',
     marginBottom: 12,
+    color: 'white', // White color for picker text
   },
   photoButton: {
-    backgroundColor: '#ddd',
+    backgroundColor: '#ffffff', // White background for photo button
     padding: 10,
     borderRadius: 5,
     alignItems: 'center',
     marginBottom: 12,
   },
   photoButtonText: {
-    color: 'black',
+    color: '#87CEEB', // Sky blue text color
   },
   profilePhoto: {
     width: 100,
@@ -292,7 +295,7 @@ const styles = StyleSheet.create({
     alignSelf: 'center',
   },
   loginText: {
-    color: 'blue',
+    color: '#ffffff', // White color for login text
     textAlign: 'center',
     marginTop: 20,
   },
@@ -318,7 +321,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   closeButton: {
-    backgroundColor: '#2196F3',
+    backgroundColor: '#87CEEB', // Sky blue background for close button
     borderRadius: 5,
     padding: 10,
     elevation: 2,

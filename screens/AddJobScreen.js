@@ -216,7 +216,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 20,
-    backgroundColor: '#fff',
+    backgroundColor: '#87CEEB', // Sky blue background
   },
   section: {
     marginVertical: 10,
@@ -224,12 +224,15 @@ const styles = StyleSheet.create({
   label: {
     fontWeight: 'bold',
     marginBottom: 5,
+    color: '#333', // Dark text color for better readability
   },
   input: {
     borderWidth: 1,
     borderColor: '#ccc',
-    borderRadius: 5,
+    borderRadius: 8,
     padding: 10,
+    backgroundColor: '#fff', // White background for input fields
+    color: '#333', // Dark text color for better readability
   },
   textArea: {
     height: 100,
@@ -239,7 +242,9 @@ const styles = StyleSheet.create({
     height: 50,
     borderColor: '#ccc',
     borderWidth: 1,
-    borderRadius: 5,
+    borderRadius: 8,
+    backgroundColor: '#fff', // White background for picker
+    color: '#333', // Dark text color for better readability
   },
   modalContainer: {
     flex: 1,
@@ -265,6 +270,7 @@ const styles = StyleSheet.create({
   modalText: {
     marginBottom: 15,
     textAlign: 'center',
+    color: '#333', // Dark text color for better readability
   },
   closeButton: {
     backgroundColor: '#2196F3',

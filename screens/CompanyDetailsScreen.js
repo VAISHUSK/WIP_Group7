@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, StyleSheet, Button, Modal, TouchableOpacity } from 'react-native';
+import { View, Text, TextInput, StyleSheet, Button, Modal, TouchableOpacity, ScrollView, KeyboardAvoidingView, Platform } from 'react-native';
 import { addDoc, collection } from 'firebase/firestore';
 import { db } from '../firebaseConfig'; // Update path as needed
 import { getAuth } from 'firebase/auth';
@@ -96,39 +96,57 @@ const CompanyDetailsScreen = ({ route, navigation }) => {
   };
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.label}>Company Phone</Text>
-      <TextInput
-        style={styles.input}
-        placeholder="Company Phone"
-        value={companyDetails.phone}
-        onChangeText={(text) => setCompanyDetails({ ...companyDetails, phone: text })}
-        keyboardType="phone-pad"
-      />
-      <Text style={styles.label}>Company Website</Text>
-      <TextInput
-        style={styles.input}
-        placeholder="Company Website"
-        value={companyDetails.website}
-        onChangeText={(text) => setCompanyDetails({ ...companyDetails, website: text })}
-      />
-      <Text style={styles.label}>Company Email</Text>
-      <TextInput
-        style={styles.input}
-        placeholder="Company Email"
-        value={companyDetails.email}
-        onChangeText={(text) => setCompanyDetails({ ...companyDetails, email: text })}
-        keyboardType="email-address"
-      />
-      <Text style={styles.label}>Company Description</Text>
-      <TextInput
-        style={[styles.input, { height: 100, textAlignVertical: 'top' }]} // Multi-line input
-        placeholder="Company Description"
-        value={companyDetails.description}
-        onChangeText={(text) => setCompanyDetails({ ...companyDetails, description: text })}
-        multiline
-      />
-      <Button title="Submit" onPress={handleSubmit} color="#2196F3" />
+    <KeyboardAvoidingView
+      style={styles.container}
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+    >
+      <ScrollView
+        contentContainerStyle={{ flexGrow: 1 }}
+        keyboardShouldPersistTaps="handled"
+      >
+        <View style={styles.section}>
+          <Text style={styles.label}>Company Phone</Text>
+          <TextInput
+            style={styles.input}
+            placeholder="Company Phone"
+            value={companyDetails.phone}
+            onChangeText={(text) => setCompanyDetails({ ...companyDetails, phone: text })}
+            keyboardType="phone-pad"
+          />
+        </View>
+        <View style={styles.section}>
+          <Text style={styles.label}>Company Website</Text>
+          <TextInput
+            style={styles.input}
+            placeholder="Company Website"
+            value={companyDetails.website}
+            onChangeText={(text) => setCompanyDetails({ ...companyDetails, website: text })}
+          />
+        </View>
+        <View style={styles.section}>
+          <Text style={styles.label}>Company Email</Text>
+          <TextInput
+            style={styles.input}
+            placeholder="Company Email"
+            value={companyDetails.email}
+            onChangeText={(text) => setCompanyDetails({ ...companyDetails, email: text })}
+            keyboardType="email-address"
+          />
+        </View>
+        <View style={styles.section}>
+          <Text style={styles.label}>Company Description</Text>
+          <TextInput
+            style={[styles.input, styles.textArea]}
+            placeholder="Company Description"
+            value={companyDetails.description}
+            onChangeText={(text) => setCompanyDetails({ ...companyDetails, description: text })}
+            multiline
+          />
+        </View>
+        <View style={styles.section}>
+          <Button title="Submit" onPress={handleSubmit} color="#2196F3" />
+        </View>
+      </ScrollView>
 
       {/* Error Modal */}
       <Modal
@@ -149,38 +167,47 @@ const CompanyDetailsScreen = ({ route, navigation }) => {
           </View>
         </View>
       </Modal>
-    </View>
+    </KeyboardAvoidingView>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: 'center',
-    padding: 16,
-    backgroundColor: '#f0f0f0',
+    backgroundColor: '#87CEEB', // Sky blue background
+  },
+  section: {
+    marginVertical: 10,
+    marginHorizontal: 16,
   },
   label: {
-    marginVertical: 8,
-    fontSize: 16,
+    fontWeight: 'bold',
+    marginBottom: 5,
+    color: '#333', // Dark text color for better readability
   },
   input: {
     height: 40,
-    borderColor: 'gray',
     borderWidth: 1,
-    marginBottom: 12,
-    paddingHorizontal: 8,
-    borderRadius: 5,
+    borderColor: '#ccc',
+    borderRadius: 8,
+    paddingHorizontal: 10,
+    backgroundColor: '#fff', // White background for input fields
+    color: '#333', // Dark text color for better readability
+  },
+  textArea: {
+    height: 100,
+    textAlignVertical: 'top',
   },
   modalContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+    backgroundColor: 'rgba(0,0,0,0.5)',
   },
   modalView: {
-    margin: 20,
+    width: 300,
     backgroundColor: 'white',
-    borderRadius: 10,
+    borderRadius: 20,
     padding: 35,
     alignItems: 'center',
     shadowColor: '#000',
@@ -195,10 +222,10 @@ const styles = StyleSheet.create({
   modalText: {
     marginBottom: 15,
     textAlign: 'center',
-    color: 'red',
+    color: '#333', // Dark text color for better readability
   },
   closeButton: {
-    backgroundColor: 'black',
+    backgroundColor: '#2196F3',
     borderRadius: 10,
     padding: 10,
     elevation: 2,

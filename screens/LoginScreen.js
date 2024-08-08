@@ -59,7 +59,6 @@ const LoginScreen = () => {
       if (docSnap.exists()) {
         const userType = docSnap.data().userType;
 
-        console.warn(userType);
         if (userType === 'employee') {
           navigation.navigate('EmployeeTabNavigator');
         } else if (userType === 'employer') {
@@ -112,7 +111,7 @@ const LoginScreen = () => {
         secureTextEntry
         autoCapitalize="none"
       />
-      <Button title="Login" onPress={onLogin} color="black" />
+      <Button title="Login" onPress={onLogin} color="#007bff" />
       <TouchableOpacity onPress={() => navigation.navigate('SignUp')}>
         <Text style={styles.signupText}>Don't have an account? Sign Up</Text>
       </TouchableOpacity>
@@ -149,7 +148,7 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     padding: 16,
-    backgroundColor: '#f0f0f0',
+    backgroundColor: '#f0faff', // Light sky blue
   },
   logo: {
     width: 150,
@@ -162,22 +161,24 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     textAlign: 'center',
     marginBottom: 20,
+    color: '#007bff', // Sky blue
   },
   input: {
     height: 40,
-    borderColor: 'gray',
+    borderColor: '#007bff', // Sky blue
     borderWidth: 1,
     marginBottom: 12,
     paddingHorizontal: 8,
     borderRadius: 5,
+    backgroundColor: '#fff',
   },
   signupText: {
-    color: 'blue',
+    color: '#007bff', // Sky blue
     textAlign: 'center',
     marginTop: 20,
   },
   forgotPasswordText: {
-    color: 'blue',
+    color: '#007bff', // Sky blue
     textAlign: 'center',
     marginTop: 10,
   },
@@ -185,10 +186,11 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)', // Semi-transparent background
   },
   modalView: {
     margin: 20,
-    backgroundColor: 'white',
+    backgroundColor: '#fff',
     borderRadius: 10,
     padding: 35,
     alignItems: 'center',
@@ -204,10 +206,10 @@ const styles = StyleSheet.create({
   modalText: {
     marginBottom: 15,
     textAlign: 'center',
-    color: 'red',
+    color: '#ff0000', // Red for error messages
   },
   closeButton: {
-    backgroundColor: 'black',
+    backgroundColor: '#007bff', // Sky blue
     borderRadius: 10,
     padding: 10,
     elevation: 2,

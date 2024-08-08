@@ -39,7 +39,6 @@ const HomeScreen = () => {
         const month = appliedDate.getMonth();
         const week = Math.floor(appliedDate.getDate() / 7);
 
-        // Ensure status exists in statusCount before incrementing
         if (statusCount[status] !== undefined) {
           statusCount[status]++;
         }
@@ -47,10 +46,6 @@ const HomeScreen = () => {
         monthlyCount[month]++;
         weeklyCount[week]++;
       });
-
-      console.log('Status Count:', statusCount); // Debugging line
-      console.log('Monthly Count:', monthlyCount); // Debugging line
-      console.log('Weekly Count:', weeklyCount); // Debugging line
 
       setPieData(Object.keys(statusCount).map(status => ({
         name: status,
@@ -65,6 +60,8 @@ const HomeScreen = () => {
         datasets: [
           {
             data: monthlyCount,
+            color: (opacity = 1) => `rgba(135, 206, 250, ${opacity})`, // Sky blue for bars
+            strokeWidth: 2,
           },
         ],
       });
@@ -74,6 +71,7 @@ const HomeScreen = () => {
         datasets: [
           {
             data: weeklyCount,
+            color: (opacity = 1) => `rgba(135, 206, 250, ${opacity})`, // Sky blue for line
             strokeWidth: 2,
           },
         ],
@@ -88,13 +86,13 @@ const HomeScreen = () => {
   const getColor = (status) => {
     switch (status) {
       case 'Applied':
-        return '#FF6384';
+        return '#87CEEB'; // Sky blue
       case 'Interview':
-        return '#36A2EB';
+        return '#4682B4'; // Steel blue
       case 'Offer':
-        return '#FFCE56';
+        return '#00BFFF'; // Deep sky blue
       case 'Rejected':
-        return '#4BC0C0';
+        return '#1E90FF'; // Dodger blue
       default:
         return '#000000';
     }
@@ -142,11 +140,11 @@ const HomeScreen = () => {
 };
 
 const chartConfig = {
-  backgroundGradientFrom: '#1E2923',
-  backgroundGradientFromOpacity: 0,
-  backgroundGradientTo: '#08130D',
+  backgroundGradientFrom: '#ffffff',
+  backgroundGradientFromOpacity: 0.5,
+  backgroundGradientTo: '#f8f8f8',
   backgroundGradientToOpacity: 0.5,
-  color: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
+  color: (opacity = 1) => `rgba(135, 206, 250, ${opacity})`, // Sky blue
   strokeWidth: 2,
   barPercentage: 0.5,
   useShadowColorFromDataset: false,
@@ -155,17 +153,17 @@ const chartConfig = {
 const styles = StyleSheet.create({
   scrollContainer: {
     flexGrow: 1,
-    backgroundColor: '#f0f0f0',
+    backgroundColor: '#f0faff', // Light sky blue
+    padding: 20,
   },
   container: {
-    padding: 20,
     alignItems: 'center',
   },
   header: {
     fontSize: 24,
     fontWeight: 'bold',
     marginBottom: 20,
-    color: '#333',
+    color: '#007bff', // Sky blue
     textAlign: 'center',
   },
 });
