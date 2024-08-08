@@ -33,4 +33,4 @@ jobs:
     - name: Build Android app with EAS
       run: eas build -p android --non-interactive
       env:
-        EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+        EXPO_TOKEN: ${{ secrets.32772799-acd9-4fa0-9054-b0990bab0f33 }}
