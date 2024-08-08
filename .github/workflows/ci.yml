@@ -24,13 +24,13 @@ jobs:
     - name: Install dependencies
       run: npm install --force
 
-    # - name: Install EAS CLI
-    #   run: npm install -g eas-cli
+    - name: Install EAS CLI
+      run: npm install -g eas-cli
 
-    # - name: Check EAS CLI version
-    #   run: eas --version
+    - name: Check EAS CLI version
+      run: eas --version
 
-    # - name: Build Android app with EAS
-    #   run: eas build -p android --non-interactive
-    #   env:
-    #     EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+    - name: Build Android app with EAS
+      run: eas build -p android --non-interactive
+      env:
+        EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
