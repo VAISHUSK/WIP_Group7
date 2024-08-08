@@ -34,3 +34,4 @@ jobs:
       run: eas build -p android --non-interactive
     #   env:
     #     EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+
