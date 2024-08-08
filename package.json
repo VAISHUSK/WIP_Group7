@@ -28,6 +28,7 @@
     "appcenter-crashes": "5.0.1",
     "axios": "^1.7.3",
     "eas": "^0.1.0",
+    "eas-cli": "^10.2.2",
     "expo": "^51.0.25",
     "expo-firebase-core": "^3.1.0",
     "expo-image-picker": "~15.0.7",
