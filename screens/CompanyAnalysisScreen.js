@@ -40,19 +40,25 @@ const CompanyAnalysisScreen = () => {
           });
           setApplications(apps);
 
+          const totalApplications = apps.length;
+          if (totalApplications === 0) return; // Avoid division by zero
+
           const statusCounts = {};
 
           apps.forEach(app => {
             statusCounts[app.status] = (statusCounts[app.status] || 0) + 1;
           });
 
-          setApplicationsByStatus(Object.keys(statusCounts).map(key => ({
+          // Convert counts to percentages and apply fixed colors
+          const statusPercentages = Object.keys(statusCounts).map((key, index) => ({
             name: key,
-            population: statusCounts[key],
-            color: getRandomColor(),
-            legendFontColor: "#FFFFFF",
+            population: (statusCounts[key] / totalApplications) * 100,
+            color: fixedColors[index % fixedColors.length], // Use fixed colors
+            legendFontColor: "#000000", // Black color for legend text
             legendFontSize: 15
-          })));
+          }));
+
+          setApplicationsByStatus(statusPercentages);
         }, (error) => {
           console.error('Error fetching applications:', error);
         });
@@ -108,14 +114,14 @@ const CompanyAnalysisScreen = () => {
   );
 };
 
-const getRandomColor = () => {
-  const letters = '0123456789ABCDEF';
-  let color = '#';
-  for (let i = 0; i < 6; i++) {
-    color += letters[Math.floor(Math.random() * 16)];
-  }
-  return color;
-};
+const fixedColors = [
+  '#0033A0', // Dark Blue
+  '#0056A0', // Medium Blue
+  '#0081C2', // Light Blue
+  '#000000', // Black
+  '#666666', // Dark Grey
+  '#999999', // Light Grey
+];
 
 const chartConfig = {
   backgroundGradientFrom: '#87CEEB', // Sky blue gradient start
@@ -124,6 +130,11 @@ const chartConfig = {
   color: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`, // Dark text for readability
   style: {
     borderRadius: 16,
+  },
+  propsForLabels: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: 'black', // Black color for label text
   },
 };
 

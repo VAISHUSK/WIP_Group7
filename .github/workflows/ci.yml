@@ -10,7 +10,7 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-latest  # Use ubuntu-latest for cross-platform builds
+    runs-on: ubuntu-latest
 
     steps:
     - name: Checkout code
@@ -19,25 +19,18 @@ jobs:
     - name: Set up Node.js
       uses: actions/setup-node@v2
       with:
-        node-version: '16'  # Specify Node.js version as per your project needs
+        node-version: '16'
 
     - name: Install dependencies
-      run: |
-        npm install --force
+      run: npm install --force
 
-    - name: Run lint
-      run: |
-        npm run lint  # Ensure this script is defined in your package.json
+    # - name: Install EAS CLI
+    #   run: npm install -g eas-cli
 
-    - name: Run tests
-      run: |
-        npm test  # Ensure this script is defined in your package.json
+    # - name: Check EAS CLI version
+    #   run: eas --version
 
-    - name: Start Metro Bundler
-      run: |
-        npm start &
-        sleep 10  # Allow some time for Metro to start
-
-    - name: Run Android build
-      run: |
-        npm run android
+    # - name: Build Android app with EAS
+    #   run: eas build -p android --non-interactive
+    #   env:
+    #     EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}

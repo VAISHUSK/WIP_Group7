@@ -13,13 +13,13 @@ const firebaseConfig = {
   measurementId: "G-XEEPHH0X3F"
 };
 
-// Initialize Firebase app
+// Initialize Firebase
 const app = initializeApp(firebaseConfig);
+console.log('Firebase app initialized');
 
-// Initialize Firebase Auth
 const auth = getAuth(app);
-
-// Initialize Firestore
 const db = getFirestore(app);
+
+console.log('Auth and Firestore initialized');
 
 export { auth, db };
